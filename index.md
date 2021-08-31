@@ -12,7 +12,10 @@ The requirements at a general level are the following:
 ### System context diagram
 
 It shows the software system being built and how it fits into the world in termos of the people who use it and the other software systems it interacts with. The solution is shown below: 
-[image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/syscontxdiagram.png?raw=true)
+
+```markdown
+![image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/syscontxdiagram.png?raw=true)
+```
 
 As seen in the image, the user interacts with the karaoke system allowing him/her/they to interact with songs and lyrics. This system also interacts with a cloud storage that is Google Cloud Storage to extract the songs data.
 
@@ -33,7 +36,7 @@ Syntax highlighted code block
 **Bold** and _Italic_ and `Code` text
 
 [Link](url) and ![Image](src)
-```
+
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
