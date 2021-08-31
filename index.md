@@ -1,12 +1,21 @@
-## Welcome to GitHub Pages
+## Spectacular Karaoke!
 
-You can use the [editor on GitHub](https://github.com/Josecespedesant/SpectacularKaraoke/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This page will document the entire section of the design of a software solution to provide a Karaoke service. The name of the project will be "Spectacular Karaoke".
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+The requirements at a general level are the following:
 
-### Markdown
+1. The user must authenticate through Forms and the system validates it against its own user database
+2. User can add / delete / modify existing songs and lyrics. This is only allowed for premium users.
+3. The user must be able to search through a list of songs, the one they want to play. You can search for it by song name, artist, album, and lyric snippets.
+4. The user can play a song for which the Karaoke application will stream the audio and synchronize the lyrics so that the user can sing to the rhythm of the music. 
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### System context diagram
+
+It shows the software system being built and how it fits into the world in termos of the people who use it and the other software systems it interacts with. The solution is shown below: 
+[image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/syscontxdiagram.png?raw=true)
+
+As seen in the image, the user interacts with the karaoke system allowing him/her/they to interact with songs and lyrics. This system also interacts with a cloud storage that is Google Cloud Storage to extract the songs data.
+
 
 ```markdown
 Syntax highlighted code block
