@@ -14,7 +14,7 @@ The requirements at a general level are the following:
 It shows the software system being built and how it fits into the world in termos of the people who use it and the other software systems it interacts with. The solution is shown below: 
 
 ```markdown
-![image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/syscontxdiagram.png?raw=true)
+![Image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/syscontxdiagram.png?raw=true)
 ```
 
 As seen in the image, the user interacts with the karaoke system allowing him/her/they to interact with songs and lyrics. This system also interacts with a cloud storage that is Google Cloud Storage to extract the songs data.
