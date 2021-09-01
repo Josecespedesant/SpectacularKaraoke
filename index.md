@@ -19,30 +19,17 @@ It shows the software system being built and how it fits into the world in termo
 As seen in the image, the user interacts with the karaoke system allowing him/her/they to interact with songs and lyrics. This system also interacts with a cloud storage that is Google Cloud Storage to extract the songs data.
 
 
-```markdown
-Syntax highlighted code block
+### Container diagram
 
-# Header 1
-## Header 2
-### Header 3
+A container diagram, zooms into the software system, and shows the containers (applications, data stores, microservices, etc.) that make up that software system. Technology decisions are also a key part of this diagram as it's shown below:
 
-- Bulleted
-- List
+![Image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/containerdiagram.png?raw=true)
 
-1. Numbered
-2. List
+It's shown that the karaoke web application is made in React, React was chosen because it facilitates the overall process of writing components, facilitates further maintenance and this essential because the system will evolve (and also it's architecture) and, if you are working on single page application and wish to make it fast, responsive and user-friendly, React is a great option. [1](https://da-14.com/blog/its-high-time-reactjs-ten-reasons-give-it-try). 
 
-**Bold** and _Italic_ and `Code` text
+Next, the API is made in Node.js, the reasons are that it allows you to build fast, scalaple API Proxy capable of handling a huge number of simultaneous request with high throughput, necessary for an application of Karaoke that uses songs. Also it has streaming support, that means it is easy to stream results back to the client of API as they are getting from existing applications. [2](https://www.instinctools.com/why-is-node-js-so-popular-for-rest-api/).
 
-[Link](url) and ![Image](src)
+Thirdly, the use of MySQL for the Data Base it's because it's ease of use, small size and that's open distributiond and source code. [3](http://books.gigatux.nl/mirror/mysqlguide4.1-5.0/0672326736/fm01lev1sec1.html)
 
+Lastly, the choice of Google Cloud Platform is because it's high compute offerings like Big Data, analytics, and machine learning. Due to the fact that we are going to use songs (Big Data). [4](https://www.datamation.com/cloud/aws-vs-azure-vs-google-cloud/)
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Josecespedesant/SpectacularKaraoke/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
