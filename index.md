@@ -33,3 +33,16 @@ Thirdly, the use of MySQL for the Data Base it's because it's ease of use, small
 
 Lastly, the choice of Google Cloud Platform is because it's high compute offerings like Big Data, analytics, and machine learning. Due to the fact that we are going to use songs (Big Data). [4](https://www.datamation.com/cloud/aws-vs-azure-vs-google-cloud/)
 
+### Database
+
+In order to create the database an entity-relationship model was created, that is the one displayed bellow.
+
+![Image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/entityrelationship.png?raw=true)
+
+It shows the relationship between users and songs in the database. An user has gender, email, birth date, name and if it's premium or not. A song has an unique identifier, a name, it's genre, the artist that created the song, an album (it may be null) and it's lyrics.
+
+Also, after the creation of the entity-relationship model was made, the next step was to create the relational model. That would be the one displayed bellow.
+
+![Image](https://github.com/Josecespedesant/SpectacularKaraoke/blob/gh-pages/relational.png?raw=true)
+
+It shows the relationship between the different tables in the database.
