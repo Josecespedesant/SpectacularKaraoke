@@ -1,0 +1,53 @@
+*System Context Diagram:
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/mysql.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/google_cloud_platform.puml
+!include FONTAWESOME/users.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
+Container(sys,"Karaoke System", "Software System", "Allows the user to interact with songs and lyrics", $sprite="")
+ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+
+Rel(user, sys, "Uses", "https")
+Rel(sys, cs, "Uses", "https")
+@enduml
+
+*Container Diagram:
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/mysql.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/google_cloud_platform.puml
+!include FONTAWESOME/users.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
+ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+
+System_Boundary(c1, "Karaoke System", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(k, "Karaoke Web Application", "React", "Allows the user to see all the information about songs", $sprite="react")
+    Container(api, "API", "Node.js", "Handles all business logic", $sprite="nodejs")
+    ContainerDb(db, "Database", "MySQL", "Holds lyrics and users information", $sprite="mysql")
+}
+
+Rel(user, k, "Uses", "https")
+Rel(k, api, "Uses", "https")
+Rel(api, cs, "Uses", "https")
+Rel_R(api, db, "Reads/Writes")
+@enduml
+
