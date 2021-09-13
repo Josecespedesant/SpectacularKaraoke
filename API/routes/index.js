@@ -9,7 +9,7 @@ const { Reservation } = require('./Parking/parking.js');
 */
 
 const { Song } = require('./song/Song.js');
-
+const { User } = require('./users/User.js');
 
 
 app.use(express.json());
@@ -23,6 +23,8 @@ const reservations = []; // lista de los carros en el parqueo
 */
 
 const songs = []; // esta es la lista del parqueo
+const users = []; // lista usuarios 
+var useractual = new User('', '', '', '', '', '', Boolean(false));
 
 
 app.all('/*', (req, res, next) => {
@@ -40,12 +42,28 @@ app.all('/*', (req, res, next) => {
 
 });
 
+app.get('/autentication/:email/:password', (req, res) => {
+    //Aca va kleylock
+    if (users.length === 0) return res.status(404).json({ error: 'No se han creado usuarios' });
+    
+    const user = users.find(c => c.email === req.params.email && c.password === req.params.password) ; // CAMBIAR A BUSCAR EN MSQL
+    if (!user) return res.status(404).json({ error: 'No existe un usuario con ese email o contraseña'});
+    //AQUI VIENE MSQL
+    Object.assign(useractual, {email: user.email, birthdate: user.birthdate, firstName: user.firstName, lastName: user.lastName, gender: user.gender, password: user.password, isPremium:user.isPremium});
+    //return res.json(usernew);
+    return res.json("Logueo exitoso")
+
+});
+
+
+
 
 app.get('/songs', (req, res) => {
-    if (songs.length === 0) return res.status(404).json({ error: 'No se han creado espacios' });
+    //no me funca el getsongs
+    if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
     const dms = songs.length;
     let spacetemp = [];
-
+    
     const artist = req.query.artist;
     const album = req.query.album;
     const genre = req.query.genre;
@@ -95,49 +113,17 @@ app.get('/songs', (req, res) => {
 
         return res.json(result);
     } 
-    /*else if (command === 'eq' || command === 'lte' || command === 'gte') {
-        
-        if (command === 'eq'){
-            var resultF = parking.filter(function(park){
-                return park.id === value
-            })
-        }else if (command === 'lte'){
-            var resultF = parking.filter(function(park){
-                return park.id < value
-            })
-        }else {
-            var resultF = parking.filter(function(park){
-                return park.id > value
-            })
-        }
-        
-        return res.json(resultF);
-    }*/
-    
 
     return res.json(songs);
 
 
 });
 
-/*
-app.get('/spaces/state', (req, res) => {
-    if (parking.length === 0) return res.status(404).json({ error: 'No hay vehiculos' });
-    const tempList = [];
-    const dms = parking.length;
-    for (let i = 0; i < dms;i++ ) {
-        tempList.push(parking[i].state);    
-        
-    }
-    return res.json(tempList);
 
 
-});
-*/
-
-app.get('/spaces/:id', (req, res) => {
+app.get('/songs/:id', (req, res) => {
     const song = songs.find(c => c.id === parseInt(req.params.id));
-    if (!song) return res.status(404).json({ error: 'No existe un campo con ese id' });
+    if (!song) return res.status(404).json({ error: 'No existe una cancion con ese id' });
     return res.json(song);
 
 });
@@ -145,15 +131,25 @@ app.get('/spaces/:id', (req, res) => {
 
 app.post('/songs/', (req, res) => {
     if (!req.query.name || !req.query.artist || !req.query.album || !req.query.lyrics || !req.query.genre) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
+    if(!useractual.isPremium) return res.status(404).json({ error: 'El usuario no es premium' });
     var newSong = new Song(req.query.name, req.query.artist, req.query.album, req.query.lyrics, req.query.genre);
     songs.push(newSong);
-    //return res.json(parking); // Cambiar a mensaje de ok
-    res.status(200).json("El espacio se actualizo correctamente");
+    return res.json(songs); // Cambiar a mensaje de ok
+    //res.status(200).json("El espacio se actualizo correctamente");
 });
 
-app.put('/spaces/:id', (req, res) => {
+app.post('/users/', (req, res) => {
+    if (!req.query.email || !req.query.birthdate || !req.query.firstName || !req.query.lastName || !req.query.gender || !req.query.password || !req.query.isPremium  ) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
+    var newUser = new User(req.query.email, req.query.birthdate, req.query.firstName, req.query.lastName, req.query.gender, req.query.password, Boolean(req.query.isPremium));
+    users.push(newUser);
+    return res.json(users); // Cambiar a mensaje de ok
+    //res.status(200).json("El usuario se actualizo correctamente");
+});
+
+app.put('/songs/:id', (req, res) => {
     const song = songs.find(c => c.id === parseInt(req.params.id));
     if (!song) return res.status(404).json({ error: 'No existe un campo con ese ID' });
+    if(!useractual.isPremium) return res.status(404).json({ error: 'El usuario no es premium' });
     song.name = req.query.name;
     song.artist = req.query.artist;
     song.album = req.query.album;
@@ -161,16 +157,17 @@ app.put('/spaces/:id', (req, res) => {
     song.genre = req.query.genre;
   
     
-    //res.json(parking);
-    res.status(200).json("El espacio se actualizo correctamente");
+    res.json(songs);
+    //res.status(200).json("El espacio se actualizo correctamente");
             
     
 });
 
 
-app.delete('/spaces/:id', (req, res) => {
+app.delete('/songs/:id', (req, res) => {
     const song = songs.find(p => p.id === parseInt(req.params.id));
     if (!song) return res.status(404).json({ error: 'No existe campo con ese ID' });
+    if(!useractual.isPremium) return res.status(404).json({ error: 'El usuario no es premium' });
 
     const index = songs.indexOf(song);
     songs.splice(index, 1);
