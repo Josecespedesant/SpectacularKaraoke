@@ -51,3 +51,38 @@ Rel(api, cs, "Uses", "https")
 Rel_R(api, db, "Reads/Writes")
 @enduml
 
+*Component Diagram (Web Application):
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/mysql.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/google_cloud_platform.puml
+!include FONTAWESOME/users.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
+
+ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+
+System_Boundary(c1, "Karaoke Web Application", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(k, "Sign-in controller", "Keycloak", "Allows the user to login into the application", $sprite="")
+    Container(library, "Library", "React", "Allows the user to play the songs and it's lyrics", $sprite="React")
+}
+
+Container(api, "API", "Node.js", "Handles all business logic", $sprite="nodejs")
+
+ContainerDb(db, "Database", "MySQL", "Holds lyrics and users information", $sprite="mysql")
+
+Rel(user, k, "Uses", "https")
+Rel(k, api, "Uses", "https")
+Rel(library, api, "Uses", "https")
+Rel(library, k, "Uses", "https")
+Rel(api, cs, "Uses", "https")
+Rel_R(api, db, "Reads/Writes")
+@enduml
