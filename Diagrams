@@ -9,13 +9,14 @@
 !include DEVICONS/mysql.puml
 !include DEVICONS/nodejs.puml
 !include DEVICONS/google_cloud_platform.puml
+!include DEVICONS/aws.puml
 !include FONTAWESOME/users.puml
 
 LAYOUT_WITH_LEGEND()
 
 Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
-Container(sys,"Karaoke System", "Software System", "Allows the user to interact with songs and lyrics", $sprite="")
-ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+Container(sys, "Karaoke System", "Software System", "Allows the user to interact with songs and lyrics", $sprite="")
+ContainerDb(cs, "Cloud Storage", "AWS Cloud Storage", "Holds the songs", $sprite="aws")
 
 Rel(user, sys, "Uses", "https")
 Rel(sys, cs, "Uses", "https")
@@ -31,18 +32,18 @@ Rel(sys, cs, "Uses", "https")
 !include DEVICONS/react.puml
 !include DEVICONS/mysql.puml
 !include DEVICONS/nodejs.puml
-!include DEVICONS/google_cloud_platform.puml
+!include DEVICONS/aws.puml
 !include FONTAWESOME/users.puml
 
 LAYOUT_WITH_LEGEND()
 
 Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
-ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+ContainerDb(cs, "Cloud Storage", "AWS Cloud Storage", "Holds the songs", $sprite="aws")
 
 System_Boundary(c1, "Karaoke System", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
     Container(k, "Karaoke Web Application", "React", "Allows the user to see all the information about songs", $sprite="react")
     Container(api, "API", "Node.js", "Handles all business logic", $sprite="nodejs")
-    ContainerDb(db, "Database", "MySQL", "Holds lyrics and users information", $sprite="mysql")
+    ContainerDb(db, "Database", "MySQL", "Holds users information", $sprite="mysql")
 }
 
 Rel(user, k, "Uses", "https")
@@ -61,14 +62,14 @@ Rel_R(api, db, "Reads/Writes")
 !include DEVICONS/react.puml
 !include DEVICONS/mysql.puml
 !include DEVICONS/nodejs.puml
-!include DEVICONS/google_cloud_platform.puml
+!include DEVICONS/aws.puml
 !include FONTAWESOME/users.puml
 
 LAYOUT_WITH_LEGEND()
 
 Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
 
-ContainerDb(cs, "Cloud Storage", "Google Cloud", "Holds the songs", $sprite="google_cloud_platform")
+ContainerDb(cs, "Cloud Storage", "AWS Cloud Storage", "Holds the songs", $sprite="aws")
 
 System_Boundary(c1, "Karaoke Web Application", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
     Container(k, "Sign-in controller", "Keycloak", "Allows the user to login into the application", $sprite="")
@@ -77,7 +78,7 @@ System_Boundary(c1, "Karaoke Web Application", $link="https://github.com/plantum
 
 Container(api, "API", "Node.js", "Handles all business logic", $sprite="nodejs")
 
-ContainerDb(db, "Database", "MySQL", "Holds lyrics and users information", $sprite="mysql")
+ContainerDb(db, "Database", "MySQL", "Holds users information", $sprite="mysql")
 
 Rel(user, k, "Uses", "https")
 Rel(k, api, "Uses", "https")
@@ -86,3 +87,36 @@ Rel(library, k, "Uses", "https")
 Rel(api, cs, "Uses", "https")
 Rel_R(api, db, "Reads/Writes")
 @enduml
+
+* Component Diagram (API):
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/react.puml
+!include DEVICONS/mysql.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/aws.puml
+!include FONTAWESOME/users.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User", "Person that wants to sing karaoke", $sprite="users")
+ContainerDb(cs, "Cloud Storage", "AWS Cloud Storage", "Holds the songs", $sprite="aws")
+Container(k, "Karaoke Web Application", "React", "Allows the user to see all the information about songs", $sprite="react")
+System_Boundary(c1, "API", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+     Container(api2, "Querys for Cloud Storage", "", "", $sprite="")
+    Container(api1, "Premium user controller", "", "", $sprite="")
+   
+    
+}
+ContainerDb(db, "Database", "MySQL", "Holds users information", $sprite="mysql")
+Rel(user, k, "Uses", "https")
+Rel(k, api1, "Uses", "https")
+Rel(k, api2, "Uses", "https")
+Rel_R(api1, db, "Reads/Writes")
+Rel(api2, cs, "Uses", "https")
+@enduml
+
