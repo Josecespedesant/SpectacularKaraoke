@@ -1,6 +1,5 @@
-//const Space = require('./Space.js') ;
-var express = require('express');
 
+var express = require('express');
 const S3 = require('aws-sdk/clients/s3');
 const fs  = require("fs");
 const path = require("path");
@@ -10,15 +9,14 @@ const upload = multer( {dest : 'uploads/'})
 var app = express.Router();
 app.use(express.json());
 app.use(cors());
-
-
-/*
-const { Space } = require('./Parking/parking.js');
-const { Reservation } = require('./Parking/parking.js');
-*/
+const { promisify } = require('util');
+const unlinkAsync = promisify(fs.unlink);
+const pathdelete = ('./uploads')
 
 const { Song } = require('./song/Song.js');
-const { User } = require('./users/User.js');
+
+const  genkey = require('./song/generatekey.js');
+//const { User } = require('./users/User.js');
 
 app.use(express.json());
 
@@ -36,14 +34,13 @@ const s3 = new S3({
 });
 
 
-/*
-const parking = []; // esta es la lista del parqueo
-const reservations = []; // lista de los carros en el parqueo
-*/
-
 const songs = []; // esta es la lista del parqueo
+songs.push(new Song('Avicii_TheNights.mp3', 'The nights', 'avicii', 'asd', 'asda'));
+songs.push(new Song('Tupac_Changes.mp3', 'changes', 'tupac', 'asadd', 'asdadsada'));
+songs.push(new Song('Tupac_Sowk.mp3', 'sowk', 'tupac', 'asadd', 'asdadsada'));
+songs.push(new Song('RicardoArjona_Minutos.mp3', 'minutos', 'ricardo arjona', 'adasd', 'assda'));
 const users = []; // lista usuarios 
-var useractual = new User('', '', '', '', '', '', Boolean(false));
+//var useractual = new User('', '', '', '', '', '', Boolean(false));
 
 /*
 app.all('/*', (req, res, next) => {
@@ -53,7 +50,7 @@ app.all('/*', (req, res, next) => {
     if (req.method==='GET' || req.method==='DELETE'){
         next();  
     }
-    else if (req.get('Content-Type')=== 'application/json'){       
+    else if (req.get('Content-Type')=== 'application/json' || req.get('Content-Type') === 'audio/mp3'){       
         next();   
     }else{       
         res.status(405).send(req.get('Content-Type'))   
@@ -61,8 +58,8 @@ app.all('/*', (req, res, next) => {
 
 });
 */
-/*
 
+/*
 app.get('/autentication/:email/:password', (req, res) => {
     if (users.length === 0) return res.status(404).json({ error: 'No se han creado usuarios' });
     s
@@ -78,23 +75,48 @@ app.get('/autentication/:email/:password', (req, res) => {
 });
 */
 
+app.get('/songs', (req, res) => {
+    const downloadParams = {
+        Bucket: 'songs-spectacular-karaoke'
+    }
+    console.log('Entre aca');
+    s3.listObjects(downloadParams, function (error, data) {
+        if (error) {
+            console.error(error);
+            res.status(500).send();
+        }
+        res.send(data);
+    });
+});
+ 
+    // Esto seria si cuando crea usuarios envia la informacion a lista de usuarios
+    
+
+/*
 app.get("/songs/:name",  async(req, res) => {    
 
     try {
         const name = req.params.name;
-        const key = `${name}.mp3`;
+        const key = `${name}.json`;
         
         const downloadParams = {
             Bucket: 'songs-spectacular-karaoke',
             Key : key
         }
+        //console.log(key);
   
         s3.getObject(downloadParams, function (error, data) {
             if (error) {
                 console.error(error);
                 res.status(500).send();
             }
-            res.send(data);
+            //const datota = fs.readFileSync(data);
+            //JSON.parse(obj.Body.toString('utf-8'))
+            const words = JSON.parse(data.Body.toString('utf-8'));
+            console.log(words.file);
+            //console.log(words[0]);
+            var buf = Buffer.from(JSON.stringify(words));
+            res.send(buf);
         });
   
     } catch (error) {
@@ -105,12 +127,100 @@ app.get("/songs/:name",  async(req, res) => {
 });
 
 
-app.delete("/songs/:name",  async(req, res) => {    
+*/
+
+app.get("/songs/by",  async(req, res) => {    
+
+    try {
+        //Cambiar songs por lo que se ocupe
+        console.log(songs);
+        if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
+        
+        const filters = req.query;
+
+
+        console.log(filters);
+        const filteredUsers = songs.filter(user => {
+            let isValid = true;
+            for (const key in filters) {
+                console.log(key, user[key], filters[key]);
+                isValid = isValid && user[key].toLowerCase() == filters[key].toString().toLocaleLowerCase();
+            }
+            return isValid;
+        });
+        let currentsSongsid = [];
+
+        for (let i = 0; i < filteredUsers.length; i++){
+
+            currentsSongsid.push(filteredUsers[i].id);
+        }
+        console.log(currentsSongsid);
+    
+
+        //const key = filteredUsers[0].id; //falta cambiar aqui
+        //console.log(idsongs);
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        var listbucket = [];
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+        
+            listbucket = data.Contents;
+            //console.log(lisbucekt);
+            //res.send(data);
+
+       
+        }).promise();
+         
+        console.log(listbucket);
+        var listbucketid = [];
+        for (let i = 0; i < currentsSongsid.length;i++){
+            console.log(currentsSongsid.length);
+            listbucket.forEach(function(song){
+                console.log(currentsSongsid[i]);
+                console.log(song.Key);
+                if(currentsSongsid[i] === song.Key){
+                    console.log('entre');
+                    listbucketid.push(song);
+                }
+                
+            });
+        }
+        
+        //for(let i = 0; listbucket.length; i++){
+            //listbucketid.push(listbucket[i].Key);
+          //  console.log(listbucket[i]);
+            //console.log(listbucket[i].Key);
+            //console.log(listbucketid);
+       // }
+        console.log(listbucketid);
+        res.send(listbucketid);
+        //
+       
+    
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    }
+    
+});
+
+
+app.delete("/songs/:name/:artist",  async(req, res) => {    
 
     try {
         //create key from user/project/section IDs
         const name = req.params.name;
-        const key = `${name}.mp3`;
+        const artist = req.params.artist;
+        let keys = [];
+        keys = genkey.generatekey(req.query.name, req.query.artist);
+
+        const key = `${keys[0]}_${keys[1]}.mp3`;
+        //const key = `${name}.mp3`;
   
   
         const downloadParams = {
@@ -132,16 +242,81 @@ app.delete("/songs/:name",  async(req, res) => {
     }
     
 });
-
-app.post("/songs/:name",  upload.single('audio', 12), async (req, res) => {
+/*
+INTENTO DE ARMAR EL JSON
+app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
 
     try {
+        if (!req.query.name || !req.query.artist || !req.query.album || !req.query.lyrics || !req.query.genre) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
+
         const audioFile = req.file;
+        const name = req.query.name;
+        const key = `${name}.json`;
+        console.log(key);
+        
+        const fileStream = fs.createReadStream(audioFile.path)
+
+        const objc = {
+            artist : req.query.artist,
+            album : req.query.album,
+            lyrics : req.query.lyrics,
+            genre : req.query.genre,
+            file : fileStream
+        }
+
+        //const buf = JSON.stringify(objc);
+        var buf = Buffer.from(JSON.stringify(objc));
+
+        //console.log(objc);
+        //console.log(objc.file);
+        console.log(buf);
         
         //create object key
         //const key = 'Avicii+The+Nights.mp3';
-        const name = req.params.name;
-        const key = `${name}.mp3`;
+        
+  
+        const uploadParams = {
+            Bucket: bucketName,
+            Body: buf,
+            Key: key,
+            ContentEncoding: 'base64',
+            ContentType: 'application/json',
+            ACL: 'bucket-owner-full-control'
+        }
+
+        console.log(uploadParams.Key);
+        console.log(uploadParams.Body);
+  
+        const result = await s3.upload(uploadParams).promise();
+        
+        res.send(result);
+  
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    }
+});
+*/
+
+
+app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
+    try {
+        if (!req.query.name || !req.query.artist || !req.query.album || !req.query.lyrics) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
+        const audioFile = req.file;
+        
+        
+        //create object key
+        //const key = 'Avicii_TheNights.mp3';
+        
+        let keys = [];
+        keys = genkey.generatekey(req.query.name, req.query.artist);
+
+        const key = `${keys[0]}_${keys[1]}.mp3`;
+        console.log(key);
+        var songCompare = new Song(key, req.query.name, req.query.artist, req.query.album, req.query.lyrics);
+        songs.push(songCompare);
+
+        
         const fileStream = fs.createReadStream(audioFile.path)
   
         const uploadParams = {
@@ -153,13 +328,17 @@ app.post("/songs/:name",  upload.single('audio', 12), async (req, res) => {
   
         const result = await s3.upload(uploadParams).promise();
         
+
         res.send(result);
+
+        //await unlinkAsync(pathdelete);
   
     } catch (error) {
         console.error(error);
         res.status(500).send();
     }
 });
+
 
 /*
 app.get('/songs', (req, res) => {
@@ -299,4 +478,3 @@ app.delete('/songs/:id', (req, res) => {
 */
 
 module.exports = app;
-
