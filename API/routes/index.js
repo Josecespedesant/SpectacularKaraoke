@@ -129,6 +129,34 @@ app.get("/songs/:name",  async(req, res) => {
 
 */
 
+app.get("/songs/:key",  async(req, res) => {    
+
+    try {
+        const key = req.params.key;
+        
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke',
+            Key : key
+        }
+  
+        s3.getObject(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+
+
+            res.send(data);
+        });
+  
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    }
+    
+});
+
+
 app.get("/songs/by",  async(req, res) => {    
 
     try {
