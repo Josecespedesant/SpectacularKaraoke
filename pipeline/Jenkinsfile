@@ -1,1 +1,25 @@
-{}
+pipeline{
+  agent { label 'main'}
+  
+    stages{
+      stage (test) {
+        steps{
+          dir("tests"){
+            sh "mvn clean compile test"
+          }
+          
+        }
+        
+      }
+      stage ("Build"){
+        steps {
+          rm "-rf *.tar.gz"
+          npm "install"
+          tar "czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
+        }
+        
+      }
+      
+    }
+  
+}
