@@ -69,6 +69,7 @@ app.get('/autentication/:email/:password', (req, res) => {
 });
 */
 
+//Devuelve toda la información del bucket
 app.get('/songs', (req, res) => {
     const downloadParams = {
         Bucket: 'songs-spectacular-karaoke'
@@ -81,13 +82,11 @@ app.get('/songs', (req, res) => {
         }
         res.send(data);
     });
-});
- 
-    // Esto seria si cuando crea usuarios envia la informacion a lista de usuarios
-    
+});    
 
 
-
+//Devuelve la metadata dada una key
+//key : key del bucket (Artista_CancionSinEspacios.mp3)
 app.get("/songs/key/:key",  async(req, res) => {    
 
     try {
@@ -115,7 +114,59 @@ app.get("/songs/key/:key",  async(req, res) => {
     
 });
 
+//Devuelve la canción dado un fragmento de su letra
+//lyrics : Fragmento de la letra
+app.get("/songs/byLyrics", async(req, res)=>{
 
+    try{
+        if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
+        const filters = req.query.lyrics;
+        const filteredSongs = songs.filter(song => song.lyrics.includes(filters));
+
+        let currentsSongsId = [];
+        for(let i = 0; i<filteredSongs.length; i++){
+            currentsSongsId.push(filteredSongs[i].id);
+        }
+
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        var listbucket = [];
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            listbucket = data.Contents; 
+        }).promise();
+         
+        console.log(listbucket);
+        var listbucketid = [];
+        for (let i = 0; i < currentsSongsId.length;i++){
+            console.log(currentsSongsId.length);
+            listbucket.forEach(function(song){
+                console.log(currentsSongsId[i]);
+                console.log(song.Key);
+                if(currentsSongsId[i] === song.Key){
+                    console.log('entre');
+                    listbucketid.push(song);
+                }
+                
+            });
+        }
+        console.log(listbucketid);
+        res.send(listbucketid);
+
+    }catch(error){
+        res.status(500).send();
+    }
+
+});
+
+//Devuelve la canción dado un parámetro (menos el fragmento de la canción)
+//artist : Nombre del artista
+//name : Nombre de la canción
+//album : Nombre del album
 app.get("/songs/by/",  async(req, res) => {    
 
     try {
@@ -196,7 +247,9 @@ app.get("/songs/by/",  async(req, res) => {
     
 });
 
-
+//Borra una canción dado un arista y nombre de canción
+//artist : Nombre del artista
+//name : Nombre de la canción
 app.delete("/songs/:name/:artist",  async(req, res) => {    
 
     try {
@@ -230,7 +283,11 @@ app.delete("/songs/:name/:artist",  async(req, res) => {
     
 });
 
-
+//Agrega una nueva canción (y el archivo de la canción)
+//artist : Nombre del artista
+//name : Nombre de la canción
+//lyrics : Letra de la canción
+//album : Nombre del album
 app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
     try {
         if (!req.query.name || !req.query.artist || !req.query.album || !req.query.lyrics) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
