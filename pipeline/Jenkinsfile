@@ -4,7 +4,6 @@ pipeline{
     stages{
       stage ("Build"){
         steps {
-          sh "sudo cd /API"
           sh "rm -rf *.tar.gz"
           sh "npm install"
           sh "tar czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
