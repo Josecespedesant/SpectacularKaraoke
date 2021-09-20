@@ -38,7 +38,7 @@ const songs = []; // esta es la lista del parqueo
 songs.push(new Song('Avicii_TheNights.mp3', 'The nights', 'avicii', 'asd', 'asda'));
 songs.push(new Song('Tupac_Changes.mp3', 'changes', 'tupac', 'asadd', 'asdadsada'));
 songs.push(new Song('Tupac_Sowk.mp3', 'sowk', 'tupac', 'asadd', 'asdadsada'));
-songs.push(new Song('RicardoArjona_Minutos.mp3', 'minutos', 'ricardo arjona', 'adasd', 'assda'));
+songs.push(new Song('RicardoArjona_Minutos.mp3', 'minutos', 'ricardo arjona', 'adasd', 'rata de dos patas'));
 const users = []; // lista usuarios 
 //var useractual = new User('', '', '', '', '', '', Boolean(false));
 
@@ -128,7 +128,7 @@ app.get("/songs/:name",  async(req, res) => {
 
 
 */
-
+/*
 app.get("/songs/:key",  async(req, res) => {    
 
     try {
@@ -154,8 +154,54 @@ app.get("/songs/:key",  async(req, res) => {
         res.status(500).send();
     }
     
-});
+});*/
 
+app.get("/songs/byLyrics", async(req, res)=>{
+
+    try{
+        if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
+        const filters = req.query.lyrics;
+        const filteredSongs = songs.filter(song => song.lyrics.includes(filters));
+
+        let currentsSongsId = [];
+        for(let i = 0; i<filteredSongs.length; i++){
+            currentsSongsId.push(filteredSongs[i].id);
+        }
+
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        var listbucket = [];
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            listbucket = data.Contents; 
+        }).promise();
+         
+        console.log(listbucket);
+        var listbucketid = [];
+        for (let i = 0; i < currentsSongsId.length;i++){
+            console.log(currentsSongsId.length);
+            listbucket.forEach(function(song){
+                console.log(currentsSongsId[i]);
+                console.log(song.Key);
+                if(currentsSongsId[i] === song.Key){
+                    console.log('entre');
+                    listbucketid.push(song);
+                }
+                
+            });
+        }
+        console.log(listbucketid);
+        res.send(listbucketid);
+
+    }catch(error){
+        res.status(500).send();
+    }
+
+});
 
 app.get("/songs/by",  async(req, res) => {    
 
