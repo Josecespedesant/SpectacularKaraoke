@@ -4,13 +4,30 @@ pipeline{
     stages{
       stage ("Build"){
         steps {
+          echo "Building the app..."
           sh "rm -rf *.tar.gz"
           sh "npm install /API"
           sh "tar czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
         }
         
       }
+      stage ("Test"){
+        steps{
+          echo "Testing the app"
+        }
+      }
+      stage ("Analyze"){
+        steps{
+          echo "Analyzing the app"
+        }
       
+      }
+      stage ("Deploy"){
+        steps{
+          echo "Deploying the app"
+        }
+        
+      }
     }
   
 }
