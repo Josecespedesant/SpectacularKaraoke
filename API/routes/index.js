@@ -170,7 +170,13 @@ app.get('/songs/allinfo/', async(req, res) => {
                 console.log(song.Key);
                 console.log(songs[i].id);
                 if(songs[i].id === song.Key){
-                    listbucketid.push(song);
+                    var data = {
+                        name: songs[i].name,
+                        artist: songs[i].artist,
+                        album: songs[i].album,
+                        lyrics: songs[i].lyrics
+                    };
+                    listbucketid.push(data);
                 }
             }    
 
@@ -185,38 +191,37 @@ app.get('/songs/allinfo/', async(req, res) => {
       
 });
 
-app.get('/songs/new/', (req, res) => {
-    const downloadParams = {
-        Bucket: 'songs-spectacular-karaoke'
-    }
-    s3.listObjects(downloadParams, function (error, data) {
-        if (error) {
-            console.error(error);
-            res.status(500).send();
-        }
-        var listbucket = [];
-        await s3.listObjects(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-                res.status(500).send();
-            }
-            listbucket = data.Contents; 
-        }).promise();
-         
-        console.log(listbucket);
-        var listbucketid = [];
-        listbucket.forEach(function(song){
-            for (let i = 0; i < songs.length;i++){
-                console.log(songs[i]);
-                console.log(song.Key);
-                console.log(songs[i].id);
-                if(songs[i].id === song.Key){
-                    listbucketid.push(song);
-                }
-            }    
+app.get('/songs/new/', async(req, res) => {
+    try {
 
-        });
-        res.send(listbucketid);
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        
+            var listbucket = [];
+            await s3.listObjects(downloadParams, function (error, data) {
+                if (error) {
+                    console.error(error);
+                    res.status(500).send();
+                }
+                listbucket = data.Contents; 
+            }).promise();
+             
+            console.log(listbucket);
+            var listbucketid = [];
+            listbucket.forEach(function(song){
+                for (let i = 0; i < songs.length;i++){
+                    console.log(songs[i]);
+                    console.log(song.Key);
+                    console.log(songs[i].id);
+                    if(songs[i].id === song.Key){
+                        listbucketid.push(song);
+                    }
+                }    
+    
+            });
+            res.send(listbucketid);
+    
     } catch (error) {
         console.error(error);
         res.status(500).send();
