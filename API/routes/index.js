@@ -16,14 +16,26 @@ const pathdelete = ('./uploads')
 const { Song } = require('./song/Song.js');
 
 const  genkey = require('./song/generatekey.js');
+const genname = require('./song/generatename.js');
 //const { User } = require('./users/User.js');
 
+const songs = []; // esta es la lista del parqueo
 app.use(express.json());
 
 const bucketName = "songs-spectacular-karaoke";
 const bucketRegion = "us-east-2";
 const bucketKey = "AKIA2DEKJIXU3Y6OUQN5";
 const bucketSecretKey = "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";
+
+
+const p1 = 'Avicii_TheNights.mp3';
+const p2 = 'RicardoArjona_Minutos.mp3';
+const p3 = 'Tupac_Changes.mp3';
+
+songs.push(new Song(p1, 'The nights', 'avicii', 'asd', 'asda', genname.generatename(p1)));
+songs.push(new Song(p3, 'changes', 'tupac', 'asadd','asdasda' ,genname.generatename(p3)));
+songs.push(new Song(p2, 'minutos', 'ricardo arjona', 'adasd', 'assda',genname.generatename(p2)));
+
 
 
 const s3 = new S3({
@@ -34,12 +46,7 @@ const s3 = new S3({
 });
 
 
-const songs = []; // esta es la lista del parqueo
-songs.push(new Song('Avicii_TheNights.mp3', 'The nights', 'avicii', 'asd', 'asda'));
-songs.push(new Song('Tupac_Changes.mp3', 'changes', 'tupac', 'asadd', 'asdadsada'));
-songs.push(new Song('Tupac_Sowk.mp3', 'sowk', 'tupac', 'asadd', 'asdadsada'));
-songs.push(new Song('RicardoArjona_Minutos.mp3', 'minutos', 'ricardo arjona', 'adasd', 'assda'));
-const users = []; // lista usuarios 
+ // lista usuarios 
 //var useractual = new User('', '', '', '', '', '', Boolean(false));
 
 
@@ -71,18 +78,82 @@ app.get('/autentication/:email/:password', (req, res) => {
 
 //Devuelve toda la información del bucket
 app.get('/songs', (req, res) => {
+    try {
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            res.send(data);
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+    
+});
+ 
+
+app.get('/songs/new/', (req, res) => {
     const downloadParams = {
         Bucket: 'songs-spectacular-karaoke'
     }
-    console.log('Entre aca');
     s3.listObjects(downloadParams, function (error, data) {
         if (error) {
             console.error(error);
             res.status(500).send();
         }
-        res.send(data);
+        var listbucket = [];
+        console.log(data.Contents.length);
+        data.Contents.forEach(function(song){
+            var name = genname.generatename(song.Key);
+            listbucket.push(name);
+            
+        });
+
+        console.log(listbucket);
+        console.log(songs);
+        res.send(listbucket);
+
     });
-});    
+});
+ 
+app.get('/songs/new/:namekey', (req, res) => {
+    try {
+        var namekey = req.params.namekey;
+        console.log(songs);
+
+        for (const key in songs) {
+            console.log(key, songs[key].namekey);
+            if(songs[key].namekey == namekey) {
+                namekey = songs[key].id
+            }               
+        }
+
+        console.log(namekey);
+        
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke',
+            Key : namekey
+        }
+        s3.getObject(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            res.send(data);
+    
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+    
+});
+
 
 
 //Devuelve la metadata dada una key
@@ -214,27 +285,22 @@ app.get("/songs/by/",  async(req, res) => {
        
         }).promise();
          
-        console.log(listbucket);
         var listbucketid = [];
-        for (let i = 0; i < currentsSongsid.length;i++){
+        
             console.log(currentsSongsid.length);
             listbucket.forEach(function(song){
-                console.log(currentsSongsid[i]);
-                console.log(song.Key);
-                if(currentsSongsid[i] === song.Key){
-                    console.log('entre');
-                    listbucketid.push(song);
+                for (let i = 0; i < currentsSongsid.length;i++){
+                    console.log(currentsSongsid[i]);
+                    console.log(song.Key);
+                    if(currentsSongsid[i] === song.Key){
+                        console.log('entre');
+                        listbucketid.push(song);
+                    }
                 }
                 
             });
-        }
         
-        //for(let i = 0; listbucket.length; i++){
-            //listbucketid.push(listbucket[i].Key);
-          //  console.log(listbucket[i]);
-            //console.log(listbucket[i].Key);
-            //console.log(listbucketid);
-       // }
+        
         console.log(listbucketid);
         res.send(listbucketid);
         //
@@ -302,7 +368,7 @@ app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
 
         const key = `${keys[0]}_${keys[1]}.mp3`;
         console.log(key);
-        var songCompare = new Song(key, req.query.name, req.query.artist, req.query.album, req.query.lyrics);
+        var songCompare = new Song(key, req.query.name, req.query.artist, req.query.album, req.query.lyrics, genname.generatename(key));
         songs.push(songCompare);
 
         
