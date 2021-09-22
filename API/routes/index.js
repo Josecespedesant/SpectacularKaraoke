@@ -77,12 +77,12 @@ app.get('/autentication/:email/:password', (req, res) => {
 */
 
 //Devuelve toda la información del bucket
-app.get('/songs', (req, res) => {
+app.get('/songs', async(req, res) => {
     try {
         const downloadParams = {
             Bucket: 'songs-spectacular-karaoke'
         }
-        s3.listObjects(downloadParams, function (error, data) {
+        await s3.listObjects(downloadParams, function (error, data) {
             if (error) {
                 console.error(error);
                 res.status(500).send();
@@ -97,6 +97,94 @@ app.get('/songs', (req, res) => {
 });
  
 
+app.get('/songs/new/', async(req, res) => {
+    try {
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            var listbucket = [];
+            console.log(data.Contents.length);
+            data.Contents.forEach(function(song){
+                var name = genname.generatename(song.Key);
+                listbucket.push(name);
+                
+            });
+    
+            console.log(listbucket);
+            console.log(songs);
+            res.send(listbucket);
+    
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+    
+});
+ 
+app.get('/songs', (req, res) => {
+    try {
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+         s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            res.send(data);
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+    
+});
+ 
+
+app.get('/songs/allinfo/', async(req, res) => {
+    try {
+        if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
+        const downloadParams = {
+            Bucket: 'songs-spectacular-karaoke'
+        }
+        var listbucket = [];
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            listbucket = data.Contents; 
+        }).promise();
+         
+        console.log(listbucket);
+        var listbucketid = [];
+        listbucket.forEach(function(song){
+            for (let i = 0; i < songs.length;i++){
+                console.log(songs[i]);
+                console.log(song.Key);
+                console.log(songs[i].id);
+                if(songs[i].id === song.Key){
+                    listbucketid.push(song);
+                }
+            }    
+
+        });
+        res.send(listbucketid);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+
+
+      
+});
+
 app.get('/songs/new/', (req, res) => {
     const downloadParams = {
         Bucket: 'songs-spectacular-karaoke'
@@ -107,20 +195,37 @@ app.get('/songs/new/', (req, res) => {
             res.status(500).send();
         }
         var listbucket = [];
-        console.log(data.Contents.length);
-        data.Contents.forEach(function(song){
-            var name = genname.generatename(song.Key);
-            listbucket.push(name);
-            
-        });
-
+        await s3.listObjects(downloadParams, function (error, data) {
+            if (error) {
+                console.error(error);
+                res.status(500).send();
+            }
+            listbucket = data.Contents; 
+        }).promise();
+         
         console.log(listbucket);
-        console.log(songs);
-        res.send(listbucket);
+        var listbucketid = [];
+        listbucket.forEach(function(song){
+            for (let i = 0; i < songs.length;i++){
+                console.log(songs[i]);
+                console.log(song.Key);
+                console.log(songs[i].id);
+                if(songs[i].id === song.Key){
+                    listbucketid.push(song);
+                }
+            }    
 
-    });
+        });
+        res.send(listbucketid);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send();
+    } 
+
+
+      
 });
- 
+
 app.get('/songs/new/:namekey', (req, res) => {
     try {
         var namekey = req.params.namekey;
@@ -139,7 +244,7 @@ app.get('/songs/new/:namekey', (req, res) => {
             Bucket: 'songs-spectacular-karaoke',
             Key : namekey
         }
-        s3.getObject(downloadParams, function (error, data) {
+         s3.getObject(downloadParams, function (error, data) {
             if (error) {
                 console.error(error);
                 res.status(500).send();
@@ -158,7 +263,7 @@ app.get('/songs/new/:namekey', (req, res) => {
 
 //Devuelve la metadata dada una key
 //key : key del bucket (Artista_CancionSinEspacios.mp3)
-app.get("/songs/key/:key",  async(req, res) => {    
+app.get("/songs/key/:key",  (req, res) => {    
 
     try {
         const key = req.params.key;
@@ -213,18 +318,18 @@ app.get("/songs/byLyrics", async(req, res)=>{
          
         console.log(listbucket);
         var listbucketid = [];
-        for (let i = 0; i < currentsSongsId.length;i++){
-            console.log(currentsSongsId.length);
-            listbucket.forEach(function(song){
+        
+        console.log(currentsSongsId.length);
+        listbucket.forEach(function(song){
+            for (let i = 0; i < currentsSongsId.length;i++){
                 console.log(currentsSongsId[i]);
                 console.log(song.Key);
                 if(currentsSongsId[i] === song.Key){
                     console.log('entre');
                     listbucketid.push(song);
                 }
-                
-            });
-        }
+            }    
+        });
         console.log(listbucketid);
         res.send(listbucketid);
 
