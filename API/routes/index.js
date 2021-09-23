@@ -114,10 +114,14 @@ app.get('/songs/new/', async(req, res) => {
                 listbucket.push(name);
                 
             });
+
+            var jsonfile = {
+                value: listbucket
+            };
     
             console.log(listbucket);
-            console.log(songs);
-            res.send(listbucket);
+            console.log(jsonfile);
+            res.send(jsonfile);
     
         });
     } catch (error) {
@@ -190,7 +194,7 @@ app.get('/songs/allinfo/', async(req, res) => {
 
       
 });
-
+/*
 app.get('/songs/new/', async(req, res) => {
     try {
 
@@ -231,6 +235,7 @@ app.get('/songs/new/', async(req, res) => {
       
 });
 
+*/
 app.get('/songs/new/:namekey', (req, res) => {
     try {
         var namekey = req.params.namekey;
@@ -436,6 +441,7 @@ app.delete("/songs/:name/:artist",  async(req, res) => {
         keys = genkey.generatekey(req.query.name, req.query.artist);
 
         const key = `${keys[0]}_${keys[1]}.mp3`;
+        
         //const key = `${name}.mp3`;
   
   
