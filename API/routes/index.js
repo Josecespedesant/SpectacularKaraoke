@@ -485,8 +485,8 @@ app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
         keys = genkey.generatekey(req.query.name, req.query.artist);
 
         const key = `${keys[0]}_${keys[1]}.mp3`;
-        console.log(key);
-        var songCompare = new Song(key, req.query.name, req.query.artist, req.query.album, req.query.lyrics, genname.generatename(key));
+        const newkey =  genname.generatename(key);
+        var songCompare = new Song(key, req.query.name, req.query.artist, req.query.album, req.query.lyrics, newkey);
         songs.push(songCompare);
 
         
