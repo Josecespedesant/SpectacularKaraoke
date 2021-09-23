@@ -249,19 +249,21 @@ app.get('/songs/new/:namekey', (req, res) => {
         }
 
         console.log(namekey);
-        
-        const downloadParams = {
-            Bucket: 'songs-spectacular-karaoke',
-            Key : namekey
-        }
-         s3.getObject(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-                res.status(500).send();
-            }
-            res.send(data);
+        var key = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
+        //console.log(key);
+        //const downloadParams = {
+         //   Bucket: 'songs-spectacular-karaoke',
+         //   Key : key
+        //}
+         //s3.getObject(downloadParams, function (error, data) {
+         //   if (error) {
+           //     console.error(error);
+            //    res.status(500).send();
+           // }
+            //res.send(data.ObjectUrl);
     
-        });
+   //     });
+        res.send(key);
     } catch (error) {
         console.error(error);
         res.status(500).send();
