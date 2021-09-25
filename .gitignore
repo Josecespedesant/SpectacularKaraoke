@@ -6,6 +6,8 @@
 # testing
 /WEB/spectacular-karaoke-tec/coverage
 
+/WEB/spectacular-karaoke-tec/package-lock.json
+
 # production
 /WEB/spectacular-karaoke-tec/build
 
