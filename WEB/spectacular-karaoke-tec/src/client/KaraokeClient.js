@@ -1,3 +1,4 @@
+
 export class KaraokeClient {
 
     async getSongsData() {
@@ -7,9 +8,9 @@ export class KaraokeClient {
         return parsedResponse.Contents;
     }
 
-    async getSongsData2() {
-        const rawResponse = await fetch("http://localhost:3001/songs");
-        const parsedResponse = await rawResponse.json();
-        return parsedResponse;
+    async getSong(name) {
+        const rawResponse = await fetch("http://localhost:3001/songs/new?namekey="+name);
+        var blob = new Blob([rawResponse], {type: 'audio/mp3'});
+        return blob
     }
 }
