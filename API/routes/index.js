@@ -194,6 +194,13 @@ app.get('/songs/allinfo/', async(req, res) => {
 
       
 });
+
+
+
+
+
+
+
 /*
 app.get('/songs/new/', async(req, res) => {
     try {
@@ -239,31 +246,26 @@ app.get('/songs/new/', async(req, res) => {
 app.get('/songs/new/:namekey', (req, res) => {
     try {
         var namekey = req.params.namekey;
+        var lyricsSong = '';
         console.log(songs);
 
         for (const key in songs) {
             console.log(key, songs[key].namekey);
+            console.log(key, songs[key].lyrics);
             if(songs[key].namekey == namekey) {
-                namekey = songs[key].id
+                namekey = songs[key].id;
+                lyricsSong = songs[key].lyrics;
             }               
         }
 
         console.log(namekey);
-        var key = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
-        //console.log(key);
-        //const downloadParams = {
-         //   Bucket: 'songs-spectacular-karaoke',
-         //   Key : key
-        //}
-         //s3.getObject(downloadParams, function (error, data) {
-         //   if (error) {
-           //     console.error(error);
-            //    res.status(500).send();
-           // }
-            //res.send(data.ObjectUrl);
-    
-   //     });
-        res.send(key);
+        var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
+        var data = {
+            key: keysong,
+            lyrics: lyricsSong
+        };
+
+        res.send(data);
     } catch (error) {
         console.error(error);
         res.status(500).send();
