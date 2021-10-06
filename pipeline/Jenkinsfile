@@ -1,36 +1,41 @@
 pipeline{
   agent any
   
-    stages{
-      stage ("Build"){
-        steps {
-          echo "Building the app..."
-          dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
-            sh "rm -rf *.tar.gz"
-            sh "npm install"
-            sh "tar czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
-          }
+  
+  environment { 
+      CI = 'true'
+  }
+  stages{
+    stage ("Build"){
+      steps {
+        echo "Building the app..."
+        dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
+          sh "rm -rf *.tar.gz"
+          sh "npm install"
+          sh "tar czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
+        }
 
-        }
+      }
         
-      }
-      stage ("Test"){
-        steps{
-          echo "Testing the app"
-        }
-      }
-      stage ("Analyze"){
-        steps{
-          echo "Analyzing the app"
-        }
-      
-      }
-      stage ("Deploy"){
-        steps{
-          echo "Deploying the app"
-        }
-        
+    }
+    stage ("Test"){
+      steps{
+        echo "Testing the app"
+        sh "./SpectacularKaraoke/API/test/test.js"
       }
     }
+    stage ("Analyze"){
+      steps{
+        echo "Analyzing the app"
+      }
+      
+    }
+    stage ("Deploy"){
+      steps{
+        echo "Deploying the app"
+      }
+        
+    }
+  }
   
 }
