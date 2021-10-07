@@ -10,7 +10,7 @@ pipeline{
       steps {
         echo "Building the app..."
         dir ("/SpectacularKaraoke/API"){
-          sh "npm install --no-optional"
+          sh "npm install"
         }
 
       }
