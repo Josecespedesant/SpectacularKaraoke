@@ -11,7 +11,7 @@ pipeline{
         echo "Building the app..."
         dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
           sh "rm -rf *.tar.gz"
-          sh "npm install"
+          sh "npm install --no-optional"
           sh "tar czf SpectacularKaraoke-$BUILD_NUMBER.tar.gz node_modules API Diagrams"
         }
 
