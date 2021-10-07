@@ -9,8 +9,8 @@ pipeline{
     stage ("Build"){
       steps {
         echo "Building the app..."
-        dir ("/SpectacularKaraoke/API"){
-          sh "npm install"
+        dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
+          sh "npm install --no-optional"
         }
 
       }
