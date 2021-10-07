@@ -19,7 +19,7 @@ pipeline{
     stage ("Test"){
       steps{
         echo "Testing the app"
-        sh "./var/lib/jenkins/workspace/SpectacularKaraoke/API/test/test.js"
+        sh "node ./var/lib/jenkins/workspace/SpectacularKaraoke/API/test/test.js"
       }
     }
     stage ("Analyze"){
