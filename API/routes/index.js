@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 const { promisify } = require('util');
 const unlinkAsync = promisify(fs.unlink);
-const pathdelete = ('./uploads')
+const pathdelete = ('./uploads');
 
 const { Song } = require('./song/Song.js');
 
@@ -28,7 +28,6 @@ const bucketName = "songs-spectacular-karaoke";
 
 initialConect.fillSongs(songs);
 const s3 = initialConect.initialConection();
-console.log(songs);
 
 app.all('/*', (req, res, next) => {
     res.header("Access-Control-Allow-Origin","*");   
