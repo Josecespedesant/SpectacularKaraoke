@@ -9,19 +9,32 @@ export default class Player extends Component {
         super();
         this.state = {
           data: 'a',
-          urla: 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/Tupac_Changes.mp3'
-
+          urla: '',
+          lyrics:`Please select a song to show your lyrics here!`
         }
+        
       }
     
       componentDidMount(){
-        this.loadData();
+        this.loadDataSongs();
       }
 
-      async loadData(){
+      song(selection){
+        this.loadSong(selection)
+      }
+
+      async loadDataSongs(){
         const newData = await this.KaraokeClient.getSongsData();
         this.setState({
           data:newData
+        });
+      }
+
+      async loadSong(name){
+        const newURL = await this.KaraokeClient.getSong(name);
+        this.setState({
+          urla:newURL.key,
+          lyrics:newURL.lyrics
         });
       }
 
@@ -36,14 +49,14 @@ export default class Player extends Component {
                 </div>
 
                   <div class="list-group list-group-flush">
-                    {Array.from(this.state.data).map((value) =>
-                      <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-                        {value.Key}
-                        <span class="badge bg-primary rounded-pill">14</span>
+                    {Array.from(this.state.data).map((value,index) =>
+                      <button type="button" onClick={()=>this.song(value)} class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                        {value}
+                        <span class="badge bg-primary rounded-pill">{index+1}</span>
                       </button>)}
                   </div>
               </div>
-                <Music url={this.state.urla}></Music>
+                <Music url={this.state.urla} lyrics={this.state.lyrics}></Music>
             </div>
             )
           }

@@ -1,54 +1,130 @@
 import React, { Component } from "react";
-import Lyrics from './Lyrics.component'
+
+function lyricsToArray(lyrics) {
+  if (lyrics) {
+    const lines = lyrics.split('\n');
+    const words = lines.reduce((words, line) => {
+      words = words.concat(line.split(' '))
+      words.push('\n');
+      return words;
+    }, []);
+    return words;
+  }
+  return [];
+}
 
 export default class Music extends Component {
     constructor(){
         super();
         this.state = {
-        play: false
+          lyrics: null,
+          lyricsArray: null,
+          currentWord: 0,
+          timer: null,
+          finished: true,
+          play: false
         }
-        this.audio='a'
-        this.lyric=`
-        Every night in my dreams
-        I see you, I feel you
-        That is how I know you, go on
-        Far across the distance   
-        And spaces between us
-        You have come to show you, go on
-        Near, far, wherever you are
-        I believe that the heart does go on
-        Once more you open the door
-        And you're here in my heart and my heart will go on and on
-        Love can touch us one time
-        And last for a lifetime
-        And never let go till we're gone
-        Love was when I loved you
-        One true time I hold you
-        In my life we'll always go on
-        Near, far, wherever you are
-        I believe that the heart does go on
-        Once more you open the door
-        And you're here in my heart
-        And my heart will go on and on
-        You're here, there's nothing I fear
-        And I know that my heart will go on
-        We'll stay forever this way
-        You are safe in my heart and my heart will go on and on`
+        this.urlm=''
+        this.audio = new Audio()
     }
-    
-    componentDidMount() {
-        this.audio = new Audio(this.props.url)
-        this.audio.addEventListener('ended', () => this.setState({ play: false }));
+
+    static getDerivedStateFromProps(props, state) {
+      if (props.lyrics !== state.lyrics) {
+        return {
+          ...state,
+          lyrics: props.lyrics,
+          lyricsArray: lyricsToArray(props.lyrics),
+          currentWord: 0,
+          finished: !props.lyrics,
+        }
+      }
+      return null;
     }
-    
+    componentWillMount() {
+      this.audio = new Audio(this.props.url)
+      this.audio.addEventListener('ended', () => this.play= false );
+    }
+
     componentWillUnmount() {
-        this.audio.removeEventListener('ended', () => this.setState({ play: false }));  
+      this.stopTimer();
+      this.audio.removeEventListener('ended', () => this.play= false );  
+    }
+
+    componentDidUpdate(prevProps) {
+      if (prevProps.url !== this.props.url) {
+        this.audio.pause()
+        this.audio.removeEventListener('ended', () => this.play= false ); 
+        this.audio = new Audio(this.props.url)
+        this.audio.addEventListener('ended', () => this.play= false );
+        this.play ?  this.togglePlay() : this.nextWord() ;
+        
+
+        this.setState({
+          lyrics:this.props.lyric,
+          lyricsArray: lyricsToArray(this.props.lyric),
+          currentWord: 0,
+          finished: !this.props.lyric})
+        
+      }
     }
   
     togglePlay = () => {
-      this.setState({ play: !this.state.play }, () => {
-        this.state.play ? this.audio.play() : this.audio.pause();
+      this.play= !this.play;
+      this.play ? this.audio.play() : this.audio.pause();
+      this.play ? this.playLyrics() : this.stopLyrics();
+    }
+
+    playLyrics = () => {
+      this.setState({
+        timer: setInterval(this.nextWord, this.props.speed),
       });
+    }
+  
+    stopTimer = () => {
+      if (this.state.timer) {
+        this.setState({
+          timer: clearInterval(this.state.timer),
+        });
+      }
+    }
+  
+    stopLyrics = () => {
+      this.stopTimer();
+      this.setState({
+        timer: null,
+      });
+      
+    }
+
+    nextWord = () => {
+      if (this.state.currentWord <= this.state.lyricsArray.length) {
+        this.setState(prevState => {
+          return { currentWord: prevState.currentWord + 1 }
+        })
+      } else if (!this.state.finished) {
+        this.setState({ finished: true }, () => {
+          !!this.props.onFinish && this.props.onFinish();
+        })
+      }
+    }
+  
+    renderHighlightedLyrics = () => {
+      const { lyricsArray, currentWord } = this.state;
+      if (currentWord === 0) {
+        return null;
+      }
+      if (currentWord<60){
+        return <span class="fw-bolder text-primary"> {lyricsArray.slice(0, currentWord).join(' ')}</span>
+      }else{
+  
+        return <><span class="fw-bolder text-white"> {lyricsArray.slice(currentWord-60, currentWord-40).join(' ')}</span> <span class="fw-bolder text-primary"> {lyricsArray.slice(currentWord-40, currentWord).join(' ')}</span></>
+      }
+      
+    }
+  
+    renderRemainingLyrics = () => {
+      const { lyricsArray, currentWord } = this.state;
+      return <span className="fw-lighter">{lyricsArray.slice(currentWord,currentWord+40).join(' ')}</span>
     }
   
     render() {
@@ -61,11 +137,20 @@ export default class Music extends Component {
               <div class="progress-bar" role="progressbar" style={{width: 400}} aria-valuenow="00" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
         </div>
-        <button class="list-group-item d-flex justify-content-center align-items-start" onClick={this.togglePlay}> {this.state.play ? 'Pause ⏸︎' :'Play ▶' } </button>
+        <button class="list-group-item d-flex justify-content-center align-items-start" onClick={this.togglePlay}> {this.play ? 'Pause ⏸︎' :'Play ▶' } </button>
           <div class="list-group list-group-flush">
-            <Lyrics lyrics={this.lyric} speed={200}></Lyrics>
+          <div className="lyrics">
+        <pre>
+          { this.renderHighlightedLyrics() } { this.renderRemainingLyrics() }
+        </pre>
+        
+      </div>
         </div>
         </>
       );
     }
+  }
+
+  Music.defaultProps = {
+    speed: 300,
   }
