@@ -20,7 +20,7 @@ pipeline{
       steps{
         echo "Testing the app"
         dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
-          sh "npm install chai"
+          sh "npm install chai --no-optional"
           sh "npm test"
         }
         
