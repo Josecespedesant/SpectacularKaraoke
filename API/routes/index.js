@@ -250,6 +250,8 @@ app.get('/songs/new/:namekey', (req, res) => {
     try {
         var namekey = req.params.namekey;
         var lyricsSong = '';
+        var songName = '';
+        var songArtist = '';
         //console.log(songs);
         for (const key in songs) {
           //  console.log(key, songs[key].namekey);
@@ -257,6 +259,8 @@ app.get('/songs/new/:namekey', (req, res) => {
             if(songs[key].namekey == namekey) {
                 namekey = songs[key].id;
                 lyricsSong = songs[key].lyrics;
+                songName = songs[key].name;
+                songArtist = songs[key].artist;
             }               
         }
 
@@ -264,7 +268,9 @@ app.get('/songs/new/:namekey', (req, res) => {
         var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
         var data = {
             key: keysong,
-            lyrics: lyricsSong
+            lyrics: lyricsSong,
+            name: songName,
+            artist : songArtist
         };
 
         res.send(data);
