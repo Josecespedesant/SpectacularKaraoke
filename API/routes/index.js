@@ -17,7 +17,7 @@ const { Song } = require('./song/Song.js');
 
 const  genkey = require('./song/generatekey.js');
 const genname = require('./song/generatename.js');
-const initialConect = require('./song/conecBucket.js');
+const initialConect = require('./song/connectBucket.js');
 //const { User } = require('./users/User.js');
 
 var songs = []; 
