@@ -18,6 +18,8 @@ const { Song } = require('./song/Song.js');
 const  genkey = require('./song/generatekey.js');
 const genname = require('./song/generatename.js');
 const initialConect = require('./song/connectBucket.js');
+const { stringify } = require('querystring');
+
 //const { User } = require('./users/User.js');
 
 var songs = []; 
@@ -28,6 +30,10 @@ const bucketName = "songs-spectacular-karaoke";
 
 initialConect.fillSongs(songs);
 const s3 = initialConect.initialConection();
+
+
+
+
 
 app.all('/*', (req, res, next) => {
     res.header("Access-Control-Allow-Origin","*");   
@@ -369,11 +375,10 @@ app.get("/songs/by/",  async(req, res) => {
 
     try {
         //Cambiar songs por lo que se ocupe
-        //console.log(songs);
         if (songs.length === 0) return res.status(404).json({ error: 'No se han creado canciones' });
         
         const filters = req.query;
-
+    
 
         //console.log(filters);
         const filteredUsers = songs.filter(user => {
