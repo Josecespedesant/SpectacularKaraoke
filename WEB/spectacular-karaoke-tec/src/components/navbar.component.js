@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Link } from "react-router-dom";
 import Login from "./login.component";
 import { KaraokeClient } from '../client/KaraokeClient';
-import Music from './music.component'
+import Player from "./player.component"
 
 export default class NavBar extends Component {
   KaraokeClient = new KaraokeClient();
@@ -15,7 +15,7 @@ export default class NavBar extends Component {
       by: '',
       data: '',
       urla: 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/Tupac_Changes.mp3',
-      lyrics: `Please select a song to show your lyrics here!`
+      lyrics: `NEW TEST LIRYCS`
 
     };
     this.active1 = false
@@ -116,7 +116,7 @@ export default class NavBar extends Component {
       <div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <div class="container-fluid">
-            <a className="navbar-brand" href="/home">Spectacular Karaoke TEC</a>
+            <a className="navbar-brand" href="/">Spectacular Karaoke TEC</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -133,7 +133,7 @@ export default class NavBar extends Component {
                       <li><a class={this.active4 ? "dropdown-item active" : "dropdown-item"} onClick={() => this.by('album')} >By Album</a></li>
                     </ul>
                   </div>
-                  <button class="btn btn-outline-primary" type="submit" value="Submit" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="fas fa-search"></i></button>
+                  <button class="btn btn-outline-primary" type="submit" value="Submit"><i class="fas fa-search"></i></button>
                 </div>
               </form>
               <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
@@ -147,24 +147,10 @@ export default class NavBar extends Component {
             </div>
           </div>
         </nav>
-
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-              <Music url={this.state.urla} lyrics={this.state.lyrics}></Music>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        
+        <Player found={this.state.data}/>
       </div>
     );
   }
+
 }

@@ -13,22 +13,6 @@ function lyricsToArray(lyrics) {
   return [];
 }
 
-function updateSong(url, lyric) {
-  this.audio.pause()
-      this.audio.removeEventListener('ended', () => this.play = false);
-      this.audio = new Audio(url)
-      this.audio.addEventListener('ended', () => this.play = false);
-      this.play ? this.togglePlay() : this.nextWord();
-
-
-      this.setState({
-        lyrics: lyric,
-        lyricsArray: lyricsToArray(lyric),
-        currentWord: 0,
-        finished: !lyric
-      })
-}
-
 export default class Music extends Component {
   constructor() {
     super();
@@ -42,7 +26,6 @@ export default class Music extends Component {
     }
     this.urlm = ''
     this.audio = new Audio()
-    updateSong = updateSong.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -58,8 +41,17 @@ export default class Music extends Component {
     return null;
   }
   componentWillMount() {
+    this.audio.pause()
+    this.audio.removeEventListener('ended', () => this.play = false);
     this.audio = new Audio(this.props.url)
     this.audio.addEventListener('ended', () => this.play = false);
+    this.play ? this.togglePlay() : this.nextWord();
+      this.setState({
+        lyrics: this.props.lyric,
+        lyricsArray: lyricsToArray(this.props.lyric),
+        currentWord: 0,
+        finished: !this.props.lyric
+      })
   }
 
   componentWillUnmount() {
