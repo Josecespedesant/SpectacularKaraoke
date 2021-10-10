@@ -331,35 +331,25 @@ app.get("/songs/byLyrics", async(req, res)=>{
         for(let i = 0; i<filteredSongs.length; i++){
             currentsSongsId.push(filteredSongs[i].id);
         }
-
-        const downloadParams = {
-            Bucket: 'songs-spectacular-karaoke'
-        }
-        var listbucket = [];
-        await s3.listObjects(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-                res.status(500).send();
-            }
-            listbucket = data.Contents; 
-        }).promise();
-         
-      //  console.log(listbucket);
-        var listbucketid = [];
-        
-        //console.log(currentsSongsId.length);
-        listbucket.forEach(function(song){
-            for (let i = 0; i < currentsSongsId.length;i++){
-        //        console.log(currentsSongsId[i]);
-         //       console.log(song.Key);
-                if(currentsSongsId[i] === song.Key){
-                    console.log('entre');
-                    listbucketid.push(song);
-                }
-            }    
-        });
-        console.log(listbucketid);
-        res.send(listbucketid);
+        console.log(currentsSongsId);
+        for (const key in songs) {
+              if(songs[key].id === currentsSongsId[0]) {
+                  namekey = songs[key].id;
+                  lyricsSong = songs[key].lyrics;
+                  songName = songs[key].name;
+                  songArtist = songs[key].artist;
+              }               
+          }
+ 
+          var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
+          var data = {
+              key: keysong,
+              lyrics: lyricsSong,
+              name: songName,
+              artist : songArtist
+          };
+        console.log(data);
+        res.send(data);
 
     }catch(error){
         res.status(500).send();
@@ -389,55 +379,32 @@ app.get("/songs/by/",  async(req, res) => {
             }
             return isValid;
         });
-        let currentsSongsid = [];
 
-        for (let i = 0; i < filteredUsers.length; i++){
-
-            currentsSongsid.push(filteredUsers[i].id);
-        }
-      //  console.log(currentsSongsid);
-    
-
-        //const key = filteredUsers[0].id; //falta cambiar aqui
-        //console.log(idsongs);
-        const downloadParams = {
-            Bucket: 'songs-spectacular-karaoke'
-        }
-        var listbucket = [];
-        await s3.listObjects(downloadParams, function (error, data) {
-            if (error) {
-                console.error(error);
-                res.status(500).send();
+        console.log(filteredUsers)
+        filteredUsers.forEach(song =>{
+            console.log(song.id);
+            for (const key in songs) {
+                if(songs[key].id === song.id) {
+                    namekey = songs[key].id;
+                    lyricsSong = songs[key].lyrics;
+                    songName = songs[key].name;
+                    songArtist = songs[key].artist;
+                }               
             }
-        
-            listbucket = data.Contents;
-            //console.log(lisbucekt);
-            //res.send(data);
+        });
+
+        var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+namekey;
+        var data = {
+            key: keysong,
+            lyrics: lyricsSong,
+            name: songName,
+            artist : songArtist
+        };
+      console.log(data);
+      res.send(data);
 
        
-        }).promise();
-         
-        var listbucketid = [];
-        
-         //   console.log(currentsSongsid.length);
-            listbucket.forEach(function(song){
-                for (let i = 0; i < currentsSongsid.length;i++){
-                 //   console.log(currentsSongsid[i]);
-               //     console.log(song.Key);
-                    if(currentsSongsid[i] === song.Key){
-             //           console.log('entre');
-                        listbucketid.push(song);
-                    }
-                }
-                
-            });
-        
-        
-       // console.log(listbucketid);
-        res.send(listbucketid);
-        //
-       
-    
+  
     } catch (error) {
         console.error(error);
         res.status(500).send();
