@@ -38,6 +38,9 @@ pipeline{
     stage ("Deploy"){
       steps{
         echo "Deploying the app"
+        dir ("/var/lib/jenkins/workspace/SpectacularKaraoke/API"){
+          sh "npm Start --no-optional"
+        }
       }
         
     }
