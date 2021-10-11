@@ -89,6 +89,10 @@ export default class Player extends Component {
     event.preventDefault();
   }
 
+  deleteSong(){
+    alert("Your song was succesfully deleted!")
+  }
+
   render() {
     return (
       <body>
@@ -122,7 +126,7 @@ export default class Player extends Component {
                     {Array.from(this.state.data).map((value, index) =>
                       <button type="button" onClick={() => this.song(value)} class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
                         {value}
-                        <span class="badge bg-primary rounded-pill">{index + 1}</span>
+                        <button class="btn btn-outline-primary" onClick={this.deleteSong}><i class="fas fa-trash"></i> <span class="badge bg-primary rounded-pill">{index + 1}</span></button>
                       </button>)}
                   </div>
                 </div>
