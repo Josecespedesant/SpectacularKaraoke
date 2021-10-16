@@ -25,7 +25,7 @@ pipeline{
         
       }
       
-    }
+    }/*
     stage ("Analyze"){
       steps{
         echo "Analyzing the app"
@@ -34,7 +34,7 @@ pipeline{
         //sh "${scannerHome}/bin/sonar-scanner"
       }
       
-    }
+    }*/
     stage ("Deploy"){
       steps{
         echo "Deploying the app"
