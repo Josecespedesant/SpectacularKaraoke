@@ -1,13 +1,12 @@
 {
-  "name": "parqueo_-_restapi",
+  "name": "karaoke_-_restapi",
   "version": "1.0.0",
-  "description": "Rest-Api para el Laboratorio #1 de SOA",
+  "description": "Rest-Api para el Proyecto #1 de SOA",
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
-  "author": "Victor Araya Hernández",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1033.0",

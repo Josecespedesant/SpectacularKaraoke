@@ -1,12 +1,12 @@
 import { MongoClient } from 'mongodb';
 import mongoose from 'mongoose';
 
-export class Database {
+export class database_user_s {
     
     constructor() {
       this.url = "mongodb+srv://karaokeuser:fckASzdYBeNx19FI@cluster0.pmiw9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
       this.client = new MongoClient(this.url);
-      this.dbName = 'Karaoke_songs';
+      this.dbName = 'User_stats';
     }
 
     async connectDB() {
@@ -16,23 +16,23 @@ export class Database {
 
     async getDbData() {
         const db = this.client.db(this.dbName);
-        const collection = db.collection('songs');        
+        const collection = db.collection('stats_by_user');        
         const findResult = await collection.find({}).toArray();
         //console.log('Found documents =>', findResult);
         return findResult
     }
     
 
-    async getUnaCancion(namekey) {
+    async getInfoUser(name) {
  
       const db = this.client.db(this.dbName);
-      const collection = db.collection('songs');
+      const collection = db.collection('stats_by_user');
   
       const findResult = await collection.find(
         {
           $and:
             [
-              {"namekey": namekey}
+              {"name": name}
             ]
         }).toArray();
         //console.log(findResult.length)
@@ -40,12 +40,12 @@ export class Database {
           return findResult;
         }
         else{
-          var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+findResult[0].key;
           const out = {
-            "key": keysong,
-            "lyrics": findResult[0].lyrics,
-            "name" : findResult[0].name,
-            "artist": findResult[0].artist
+            "name": findResult[0].name,
+            "n_songs": findResult[0].n_songs,
+            "fav_artists": findResult[0].fav_artists,
+            "e_words": findResult[0].e_words,
+            "d_words": findResult[0].d_words 
           };
         
         return out
@@ -79,128 +79,114 @@ export class Database {
     }
 
     // Insertar nuevo documento
-    async insertData(key, name,artist,album,lyrics,namekey) {
+    async insertUser(name) {
       const db = this.client.db(this.dbName);
-      const collection = db.collection('songs'); 
+      const collection = db.collection('stats_by_user'); 
+      var n_songs = 0;
+      var fav_artists = [];
+      var e_words = [];
+      var d_words = [];
       const myobj = { 
-        key :key,
         name: name,
-        artist:artist,
-        album: album,
-        lyrics : lyrics,
-        namekey :namekey
-      };    
+        n_songs:n_songs,
+        fav_artists: fav_artists,
+        e_words : e_words,
+        d_words : d_words
+      };   
       await collection.insertOne(myobj);            
     }
 
-    async getLetra(lyrics) {
-      const db = this.client.db(this.dbName);
-      const collection = db.collection('songs'); 
-      const findResult = await collection.find(
+    async add_n_songs(name) {
+        const db = this.client.db(this.dbName);
+        const collection = db.collection('stats_by_user'); 
+        const findResult = await collection.find(
         {
-          $and:
-            [
-              {"lyrics": {$regex: lyrics }}
-            ]
+            $and:
+                [
+                    {"name": name}
+                ]
         }).toArray();
-        var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+findResult[0].key;
-        const out = {
-          "key": keysong,
-          "lyrics": findResult[0].lyrics,
-          "name" : findResult[0].name,
-          "artist": findResult[0].artist
-        };
-      return out;
+        var myobj = { $set:{ 
+            "name": findResult[0].name,
+            "n_songs": findResult[0].n_songs + 1,
+            "fav_artists": findResult[0].fav_artists,
+            "e_words": findResult[0].e_words,
+            "d_words": findResult[0].d_words    
+          }};    
+          await collection.updateOne({"_id":mongoose.Types.ObjectId(findResult[0]._id)},myobj);            
     }
-
-
-    async updateEditedSong(_id,URL,Album,Artista,NombreCancion,Letra) {
-      const db = this.client.db(this.dbName);
-      const collection = db.collection('Canciones'); 
-      const valor =  true;
-      var myobj = { $set:{ 
-        "URL": URL,
-        "Album": Album,
-        "Artista": Artista,
-        "NombreCancion": NombreCancion,
-        "Letra": Letra,
-        "Status": "Active"    
-      }};    
-      await collection.updateOne({"_id":mongoose.Types.ObjectId(_id)},myobj);            
-    }
-
-    async getSongsByFilter(dato,filtro) {
-      const db = this.client.db(this.dbName);
-      const collection = db.collection('songs'); 
-      let myObj;
-      let busquedaPorLetra = false;
+                 
       
-      switch (filtro) {
-        case "name":
-          myObj = {
-            "name": dato
-          }   
-          break;
-        case "artist":
-          myObj = {
-            "artist": dato
-          } 
-          break;
-        case "album":
-          myObj = {
-            "album": dato
-          } 
-          break;
-        default: //Case Fragmento de la Letra
-          myObj = {
-            "lyrics" : {$regex: dato }
-          } 
-          busquedaPorLetra = true;
-          break;
-      }
-
-      //let findResult;
-      if (busquedaPorLetra){
-        //console.log(myObj);
-        var findResult = await collection.find(myObj).toArray(); 
-        var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+findResult[0].key;
-        const out = {
-          "key": keysong,
-          "lyrics": findResult[0].lyrics,
-          "name" : findResult[0].name,
-          "artist": findResult[0].artist
-        };
-      return out;  
-      }
-      else{
-        
-        var findResult = await collection.find(myObj).toArray();
-      
-        var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+findResult[0].key;
-        const out = {
-          "key": keysong,
-          "lyrics": findResult[0].lyrics,
-          "name" : findResult[0].name,
-          "artist": findResult[0].artist
-        };
-        return out;      
-      } 
-      
-    }
-    
-    async deleteSongsById(namekey) {
+    async addFavArtist(name, artistName) {
       const db = this.client.db(this.dbName);
-      const collection = db.collection('songs'); 
-      const myObj = 
+      const collection = db.collection('stats_by_user'); 
+      const findResult = await collection.find(
       {
-        "namekey": namekey
-      }    
-      await collection.deleteOne(myObj);
+          $and:
+              [
+                  {"name": name}
+              ]
+      }).toArray();
+      let arrayArtist = findResult[0].fav_artists;
+      arrayArtist.push(artistName);
+      var myobj = { $set:{ 
+          "name": findResult[0].name,
+          "n_songs": findResult[0].n_songs,
+          "fav_artists": arrayArtist,
+          "e_words": findResult[0].e_words,
+          "d_words": findResult[0].d_words    
+        }};    
+        await collection.updateOne({"_id":mongoose.Types.ObjectId(findResult[0]._id)},myobj);            
+    }
+     
+    async addDword(name, dWord) {
+      const db = this.client.db(this.dbName);
+      const collection = db.collection('stats_by_user'); 
+      const findResult = await collection.find(
+      {
+          $and:
+              [
+                  {"name": name}
+              ]
+      }).toArray();
+      let arrayDwords = findResult[0].d_words;
+      arrayDwords.push(dWord);
+      var myobj = { $set:{ 
+          "name": findResult[0].name,
+          "n_songs": findResult[0].n_songs,
+          "fav_artists": findResult[0].fav_artists,
+          "e_words": findResult[0].e_words,
+          "d_words": arrayDwords    
+        }};    
+        await collection.updateOne({"_id":mongoose.Types.ObjectId(findResult[0]._id)},myobj);            
+    }
 
-    }    
+
+    async addEword(name, eWord) {
+      const db = this.client.db(this.dbName);
+      const collection = db.collection('stats_by_user'); 
+      const findResult = await collection.find(
+      {
+          $and:
+              [
+                  {"name": name}
+              ]
+      }).toArray();
+      let arrayEwords = findResult[0].e_words;
+      arrayEwords.push(eWord);
+      var myobj = { $set:{ 
+          "name": findResult[0].name,
+          "n_songs": findResult[0].n_songs,
+          "fav_artists": findResult[0].fav_artists,
+          "e_words": arrayEwords,
+          "d_words": findResult[0].d_words    
+        }};    
+        await collection.updateOne({"_id":mongoose.Types.ObjectId(findResult[0]._id)},myobj);            
+    }
+
     
     async closeConnection() {
-      this.client.close();
+      await this.client.close();
     }
   }
 
