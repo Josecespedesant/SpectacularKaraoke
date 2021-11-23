@@ -1,7 +1,7 @@
-import { MongoClient } from 'mongodb';
-import mongoose from 'mongoose';
+const { MongoClient } =require( 'mongodb');
+const mongoose =require('mongoose');
 
-export class database_songs {
+class database_songs {
     
     constructor() {
       this.url = "mongodb+srv://karaokeuser:fckASzdYBeNx19FI@cluster0.pmiw9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
@@ -205,3 +205,4 @@ export class database_songs {
     }
   }
 
+module.exports.database_songs = database_songs;

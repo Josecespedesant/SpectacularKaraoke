@@ -1,5 +1,5 @@
 
-export function genkey(name, artist){
+function genkey(name, artist){
     const nameTemp = name;
     const artistTemp = artist;
     var aTemp1 = artistTemp.toString().split(' ');
@@ -37,3 +37,4 @@ export function genkey(name, artist){
 }
 
 
+module.exports.genkey = genkey;

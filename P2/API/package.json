@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Rest-Api para el Proyecto #1 de SOA",
   "main": "app.js",
-  "type": "module",
   "scripts": {
     "start": "node app.js"
   },

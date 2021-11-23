@@ -1,4 +1,4 @@
-export function genname(key){
+function genname(key){
     const keyTemp = key;
     var akeyTemp = keyTemp.toString().split('_');
     var akeyTemp00 = akeyTemp[0].split('.');
@@ -30,3 +30,4 @@ export function genname(key){
     return result;
 }
 
+module.exports.genname = genname;
