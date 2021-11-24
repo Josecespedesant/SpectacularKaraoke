@@ -4,13 +4,17 @@ const { database_songs } =require( '../databases/database_songs.js');
 const { database_user_s } =require( '../databases/database_user_s.js');
 const {genname} =require( '../utils/generatename.js');
 const {genkey} =require( '../utils/generatekey.js');
-//const {indexRouter} require( './routes/index.js';
+const {artistInfo} = require('../utils/artistInfo.js');
 const AWS =require( 'aws-sdk');
 const multer =require( 'multer');
 const fs =require( "fs");
+
 var app = express.Router();
 app.use(express.json());
 app.use(cors());
+const MusicBrainzApi = require('musicbrainz-api').MusicBrainzApi;
+const mbApi = new MusicBrainzApi();
+
 
 const upload = multer( {dest : 'uploads/'});
 
@@ -46,7 +50,7 @@ app.all('/*', async (req, res, next) => {
 
 ////////////////////// SONGS ///////////////////////////
 
-
+//NO se usa
 app.get('/songs/new/', (req, res) => {
   try {
 
@@ -83,18 +87,9 @@ app.get('/songs/new/', (req, res) => {
   
 });
 
-app.get('/infoWiki/', async (req, res) =>{
-  try {
-    var artist = req.query.artist;
-    
 
-  }catch(error){
-    console.error(error);
-    res.status(500).send();
-  }
-});
 
-//////////////////////////////////////////////////////////////////////////
+//Devuelve todas las canciones disponibles
 app.get('/songs/allinfo/', async(req, res) => {
   try {
       await db_song.connectDB();
@@ -135,7 +130,8 @@ app.get('/songs/allinfo/', async(req, res) => {
     
 });
 
-
+//Devuelve la canción dado un parametro(namekey)
+//namekey : nombre clave JE Tupac Shakur-Changes
 app.get('/songs/new/:namekey', async(req, res) => {
   try {
       await db_song.connectDB();
@@ -198,7 +194,8 @@ app.get("/songs/by/",  async(req, res) => {
   }
   
 });
-
+//Elimina una cancion con nombre clave
+//namekey: nombre clave EJ Avicii-The Nights
 app.delete("/songs/:namekey",  async(req, res) => {    
 
   try {
@@ -240,6 +237,12 @@ app.delete("/songs/:namekey",  async(req, res) => {
   
 });
 
+//Agrega una cancion
+//name: nombre de la cancion
+//artist: artista
+//Album: album de la cancion
+//lyrics: lyrics de la cancion
+//audio: archivo mp3
 app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
   try {
       if (!req.query.name || !req.query.artist || !req.query.album || !req.query.lyrics) return res.status(404).json({error:'Por favor agregar los detalles faltantes'});
@@ -281,6 +284,28 @@ app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
 
 
 
+////////////////////////////FEATURE INFO WIKI//////////////////////////////////////////
+//Devuelve la informacion relevante de un artista
+//artist: nombre del artista
+app.get('/infoWiki/:artist', async (req, res) =>{
+  try {
+    var artist = req.params.artist;
+
+    const result = await mbApi.searchArtist(artist);
+
+    const f = result.artists[0];
+    var json = artistInfo(f);
+    console.log(json);
+    res.send(json);
+  }catch(error){
+    console.error(error);
+    res.status(500).send();
+  }
+});
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 
@@ -289,10 +314,8 @@ app.post("/songs/",  upload.single('audio', 12), async (req, res) => {
 
 /////////////////////////////////// USERS ////////////////////////////////////////
 
-
-
-
-
+//Devuelve informacion del usuario
+//name : nombre del usuario(ID?)
 app.get('/user/info/:name', async(req, res) => {
   try {
       await db_user.connectDB();
@@ -308,6 +331,8 @@ app.get('/user/info/:name', async(req, res) => {
   
 });
 
+//Agrega reproduccion a un usuario
+//nameUser: nombre del usuario(ID?)
 app.post('/user/addPlay/', async(req, res) => {
   try {
       await db_user.connectDB();
@@ -323,6 +348,8 @@ app.post('/user/addPlay/', async(req, res) => {
   
 });
 
+//Agrega una palabra facil a un usuario
+//nameUser: el nombre del usuario
 app.post('/user/addEword/', async(req, res) => {
   try {
       await db_user.connectDB();
@@ -339,6 +366,8 @@ app.post('/user/addEword/', async(req, res) => {
   
 });
 
+//Agrega una palabra dificil a un usuario
+//nameUser: el nombre del usuario
 app.post('/user/addDword/', async(req, res) => {
   try {
       await db_user.connectDB();
@@ -355,7 +384,9 @@ app.post('/user/addDword/', async(req, res) => {
   
 });
 
-
+//Agrega artista favorito a  un usuario
+//nameUser: el nombre del usuario
+//artistName: nombre del artista a agregar
 app.post('/user/addArtist/', async(req, res) => {
   try {
       await db_user.connectDB();
@@ -373,7 +404,8 @@ app.post('/user/addArtist/', async(req, res) => {
   
 });
 
-
+//Agrega a un usuario a la DB, (solo es requerido nombre/ID)
+//nameUser: nombre de usuario (ID?)
 app.post('/user/', async (req, res ) =>{
   try {
     await db_user.connectDB();

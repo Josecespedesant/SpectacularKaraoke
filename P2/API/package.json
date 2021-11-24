@@ -11,10 +11,12 @@
     "aws-sdk": "^2.1033.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "country-code-lookup": "^0.0.19",
     "express": "^4.17.1",
     "mongodb": "^4.1.2",
     "mongoose": "^6.0.11",
     "morgan": "^1.10.0",
-    "multer": "^1.4.3"
+    "multer": "^1.4.3",
+    "musicbrainz-api": "^0.6.0"
   }
 }
