@@ -1,5 +1,8 @@
 const { MongoClient } =require( 'mongodb');
 const mongoose =require('mongoose');
+const {artistInfo} = require('../utils/artistInfo.js');
+const MusicBrainzApi = require('musicbrainz-api').MusicBrainzApi;
+const mbApi = new MusicBrainzApi();
 
 class database_songs {
     
@@ -40,12 +43,17 @@ class database_songs {
           return findResult;
         }
         else{
+          var artist = findResult[0].namekey;
+          const result = await mbApi.searchArtist(artist);
+          const f = result.artists[0];
+          var json = artistInfo(f);
           var keysong = 'https://songs-spectacular-karaoke.s3.us-east-2.amazonaws.com/'+findResult[0].key;
           const out = {
             "key": keysong,
             "lyrics": findResult[0].lyrics,
             "name" : findResult[0].name,
-            "artist": findResult[0].artist
+            "artist": findResult[0].artist,
+            "wiki" : json
           };
         
         return out
