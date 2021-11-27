@@ -1,0 +1,22 @@
+
+        body {
+            font-size: 1em;
+            font-family: sans-serif;
+        }
+        section {
+            margin: 1em auto;
+            width: 810px;
+        }
+        h1, p {
+            text-align: center;
+        }
+        .cdg-border {
+            background-color: #000;
+            display: inline-block;
+        }
+        .cdg-canvas {
+            width: 500px;
+            text-align: center;
+            align-items: center;
+        }
+    

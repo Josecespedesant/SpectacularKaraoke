@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import { KaraokeClient } from '../client/KaraokeClient';
 import Music from './music.component'
+import cdg from "../cdg.js/src/cdg"
+import natural from 'natural'
+
 
 export default class Player extends Component {
   KaraokeClient = new KaraokeClient();
@@ -10,23 +13,91 @@ export default class Player extends Component {
     this.state = {
       data: 'a',
       urla: '',
-      lyrics: `Please select a song to show your lyrics here!`,
+      lyrics: `
+      Time slows down when it can get no worse
+      I can feel it running out on me
+      I don't want these to be my last words
+      All forgotten 'cause that's all they'll be
+      Now there's only one thing I can do
+      Fight until the end like I promised to
+      Wishing there was something left to lose
+      This could be the day I die for you
+      What do you see before it's over?
+      Blinding flashes getting closer
+      Wish that I had something left to lose
+      This could be the day I die for you
+      This could be the day I die for you
+      This could bе the day I die for you
+      This could be thе day
+      Everything I know, everything I hold tight
+      When to let it go, when to make 'em all fight
+      When I'm in control, when I'm out of my mind
+      When I gotta live, when I gotta die, gotta die
+      Everything I know, everything I hold tight
+      When to let it go, when to make 'em all fight
+      When I'm in control, when I'm out of my mind
+      When I gotta live, when I gotta die
+      This could be the day I die for you
+      Everything I know, everything I hold tight
+      When to let it go, when to make 'em all fight
+      When I'm in control, when I'm out of my mind (This could be the day)
+      When I gotta live, when I gotta die
+      Feeling like there's nothing I can do
+      This could be the end it's mine to choose
+      It's taken me my lifetime just to prove
+      This could be the day I die for you
+      Don't let it be the day…
+      What do you see before it's over?
+      Blinding flashes getting closer
+      Sacrificing everything I knew
+      This could be the day I die for you
+      This could be the day I die for you
+      Everything I know, everything I hold tight
+      When to let it go, when to make 'em all fight
+      When I'm in control, when I'm out of my mind (This could be the day)
+      When I gotta live, when I gotta die`,
       found: '',
       foundDis: false,
-      valueName:'',
-      valueArtist:'',
-      valueAlbum:'',
-      valueLyrics:'',
+      valueName: '',
+      valueArtist: '',
+      valueAlbum: '',
+      valueLyrics: '',
       selectedFile: null
+      
+
     }
     this.handleChangeName = this.handleChangeName.bind(this);
     this.handleChangeArtist = this.handleChangeArtist.bind(this);
     this.handleChangeAlbum = this.handleChangeAlbum.bind(this);
     this.handleChangeLyrics = this.handleChangeLyrics.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.loadKaraoke = this.loadKaraoke.bind(this);
+    this.arraySong=[]
+    this.avg=0
+
   }
+
   componentDidMount() {
-    this.loadDataSongs();
+    
+
+    let player = cdg.init("cdg", { autoplay: false, showControls: true });
+    player.loadTrack({
+      audioFilePrefix: 'demo', // prefix of the audio file. Required
+      cdgFilePrefix: 'demo', // prefix of the CDG file. Optional, defaults to audioFilePrefix value
+      mediaPath: '/', // the path to the directory containing the CDG and audio files. Default: './'
+      audioFormat: 'mp3', // Format and extension of the audio file. 'mp3' or 'ogg' are curently supported. Default: 'mp3'
+      cdgFileExtension: 'cdg' // Default: 'cdg'
+    });
+
+    // The player also exposes play(), pause() and stop() methods which can be easily bound to event handlers
+    document.getElementById("stopbtn").addEventListener("click", function () {
+      player.stop();
+    });
+
+    this.loadDataSongs();    
+  }
+
+  analyze(){
+    this.loadKaraoke();
   }
 
   song(selection) {
@@ -50,12 +121,52 @@ export default class Player extends Component {
     });
   }
 
+  async loadKaraoke() {
+    const newData = await this.KaraokeClient.getKaraokeData();
+    this.arraySong=newData
+    this.analyzeLetter();
+  }
+
   async loadSong(name) {
     const newURL = await this.KaraokeClient.getSong(name);
     this.setState({
       urla: newURL.key,
       lyrics: newURL.lyrics
     });
+  }
+
+  analyzeLetter(){
+    var tokenizer = new natural.WordTokenizer();
+    var songLyrics=tokenizer.tokenize(this.state.lyrics)
+    var prom=[]
+    var i = 0
+    var a = 1
+    for (; i < songLyrics.length; i++) {
+      if( a+1>=this.arraySong.length){ 
+        //prom.push(1)
+      }else{ 
+          if(natural.DiceCoefficient(this.arraySong[a-1], songLyrics[i])>natural.DiceCoefficient(this.arraySong[a], songLyrics[i])){
+            prom.push(natural.DiceCoefficient(this.arraySong[a-1], songLyrics[i])) 
+            a-=1
+          }else{ 
+            if(natural.DiceCoefficient(this.arraySong[a+1], songLyrics[i])>natural.DiceCoefficient(this.arraySong[a], songLyrics[i])){
+              prom.push(natural.DiceCoefficient(this.arraySong[a+1], songLyrics[i])) 
+              a+=1
+            }else{ 
+              prom.push(natural.DiceCoefficient(this.arraySong[a], songLyrics[i]))
+            }
+          }
+        }
+        a++
+   }
+    
+    let sum = prom.reduce((previous, current) => current += previous);
+    this.avg = sum / prom.length; 
+    console.log(songLyrics)
+    console.log(this.arraySong)
+    console.log(prom)
+    console.log(this.avg)
+    this.forceUpdate()
   }
 
   handleChangeName(event) {
@@ -75,21 +186,21 @@ export default class Player extends Component {
   }
 
   onFileChange = event => {
-    
+
     this.setState({ selectedFile: event.target.files[0] });
-  
+
   };
 
   async handleSubmit(event) {
-    await this.KaraokeClient.newSong(this.state.selectedFile,this.state.valueName,this.state.valueArtist,this.state.valueAlbum,this.state.valueLyrics);
+    await this.KaraokeClient.newSong(this.state.selectedFile, this.state.valueName, this.state.valueArtist, this.state.valueAlbum, this.state.valueLyrics);
     //this.setState({
     //  data: newData
     //});
-    console.log(this.state.valueName,this.state.valueArtist,this.state.valueArtist,this.state.valueLyrics,this.state.selectedFile)
+    console.log(this.state.valueName, this.state.valueArtist, this.state.valueArtist, this.state.valueLyrics, this.state.selectedFile)
     event.preventDefault();
   }
 
-  deleteSong(){
+  deleteSong() {
     alert("Your song was succesfully deleted!")
   }
 
@@ -107,7 +218,7 @@ export default class Player extends Component {
                 </ol>
                 {this.state.found !== '' ? <div class="card mb-4">
                   <div class="card-header">
-                    <i class="fas fa-search"></i> 
+                    <i class="fas fa-search"></i>
                     Results of the Search
                   </div>
                   <div class="list-group list-group-flush">
@@ -129,47 +240,42 @@ export default class Player extends Component {
                         <button class="btn btn-outline-primary" onClick={this.deleteSong}><i class="fas fa-trash"></i> <span class="badge bg-primary rounded-pill">{index + 1}</span></button>
                       </button>)}
                   </div>
-                </div>
-                <Music url={this.state.urla} lyrics={this.state.lyrics}></Music>
-                <div class="row">
-                  <div class="col-xl-3 col-md-6">
-                    <div class="card bg-primary text-white mb-4">
-                      <div class="card-body">Featured Song 1</div>
-                      <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-xl-3 col-md-6">
-                    <div class="card bg-warning text-white mb-4">
-                      <div class="card-body">Featured Song 2</div>
-                      <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-xl-3 col-md-6">
-                    <div class="card bg-success text-white mb-4">
-                      <div class="card-body">Featured Song 3</div>
-                      <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-xl-3 col-md-6">
-                    <div class="card bg-danger text-white mb-4">
-                      <div class="card-body">Featured Song 4</div>
-                      <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
+                </div>
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <i class="fas fa-music me-1"> </i>
+                    Current song <span type="button" class="badge bg-primary rounded-pill">Sync</span>
+                  </div>
+                  <div class="list-group list-group-flush">
+                    <div class="row">
+                      <div class="col-xl-4 col-md-6"></div>
+                      <div class="col-xl-4 col-md-6">
+                        <div className="lyrics">
+                          <div id="cdg"></div>
+                          <p>
+                            <button id="stopbtn" class='btn btn-outline-primary'>Stop</button>
+                            <button id="stopbtn" onClick={this.loadKaraoke} class='btn btn-outline-primary'>Analyze</button>
+                            
+                          </p>
+
+                        </div>
+                      </div>
+                      <div class="col-xl-4 col-md-6">
+                        <div class="card bg-danger text-white mx-4 my-4">
+                          <div class="card-body">Score!</div>
+                          <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link">Accuracy: </a>
+                            <div class="small text-white"> {this.avg*100} %</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="lyrics">
+                        <div id="cdg"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               </div>
             </main>
@@ -192,33 +298,34 @@ export default class Player extends Component {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form onSubmit={this.handleSubmit}>
-                <div class="modal-body">
-                  <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">Song Name</span>
-                    <input type="text" value={this.state.valueName} onChange={this.handleChangeName} class="form-control" placeholder="Name" aria-label="Name" aria-describedby="basic-addon1" />
+                  <div class="modal-body">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1">Song Name</span>
+                      <input type="text" value={this.state.valueName} onChange={this.handleChangeName} class="form-control" placeholder="Name" aria-label="Name" aria-describedby="basic-addon1" />
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1">Song Artist</span>
+                      <input type="text" value={this.state.valueArtist} onChange={this.handleChangeArtist} class="form-control" placeholder="Artist" aria-label="Artist" aria-describedby="basic-addon1" />
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1">Song Album</span>
+                      <input type="text" value={this.state.valueAlbum} onChange={this.handleChangeAlbum} class="form-control" placeholder="Album" aria-label="Album" aria-describedby="basic-addon1" />
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text">Lyrics</span>
+                      <textarea class="form-control" value={this.state.valueLyrics} onChange={this.handleChangeLyrics} aria-label="Your song lyrics"></textarea>
+                    </div>
+                    <div class="input-group mb-3">
+                      <label class="input-group-text" for="inputGroupFile01">Upload Song File</label>
+                      <input type="file" onChange={this.onFileChange} class="form-control" id="inputGroupFile01" />
+                    </div>
                   </div>
-                  <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">Song Artist</span>
-                    <input type="text" value={this.state.valueArtist} onChange={this.handleChangeArtist} class="form-control" placeholder="Artist" aria-label="Artist" aria-describedby="basic-addon1" />
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" type="submit" value="Submit">Save New Song</button>
                   </div>
-                  <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">Song Album</span>
-                    <input type="text" value={this.state.valueAlbum} onChange={this.handleChangeAlbum} class="form-control" placeholder="Album" aria-label="Album" aria-describedby="basic-addon1" />
-                  </div>
-                  <div class="input-group mb-3">
-                    <span class="input-group-text">Lyrics</span>
-                    <textarea class="form-control" value={this.state.valueLyrics} onChange={this.handleChangeLyrics} aria-label="Your song lyrics"></textarea>
-                  </div>
-                  <div class="input-group mb-3">
-                    <label class="input-group-text" for="inputGroupFile01">Upload Song File</label>
-                    <input type="file" onChange={this.onFileChange} class="form-control" id="inputGroupFile01" />
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button class="btn btn-success" type="submit" value="Submit">Save New Song</button>
-                </div>
                 </form>
+
               </div>
             </div>
           </div>
@@ -230,6 +337,10 @@ export default class Player extends Component {
         <script src="assets/demo/chart-bar-demo.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
         <script src="js/datatables-simple-demo.js"></script>
+        <script type="text/javascript" src="dist/jszip-utils.js"></script>
+        <script type="text/javascript" src="my/assets/jszip.min.js"></script>
+        <script type="text/javascript" src="my/assets/jszip-utils.min.js"></script>
+        <script type="text/javascript" src="my/assets/jsmediatags.min.js"></script>
       </body>
 
     )

@@ -87,7 +87,11 @@ app.get('/songs/new/', (req, res) => {
   
 });
 
-
+app.get('/songs/read', (req, res, next) => { fs.readFile('C:/Users/yen21/Documents/Programming/SpectacularKaraoke/WEB/spectacular-karaoke-tec/ttsModule/test.txt', function (err, buffer) {
+  console.log("buffer")
+  res.send(buffer.toString().split(" "));
+}) 
+})
 
 //Devuelve todas las canciones disponibles
 app.get('/songs/allinfo/', async(req, res) => {

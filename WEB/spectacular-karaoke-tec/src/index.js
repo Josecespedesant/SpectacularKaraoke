@@ -6,6 +6,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { CookiesProvider } from 'react-cookie';
+import * as JSZip from 'jszip';
+import JSZipUtils from 'jszip-utils';
 
 ReactDOM.render(
   <CookiesProvider>

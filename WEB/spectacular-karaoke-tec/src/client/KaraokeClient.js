@@ -44,5 +44,12 @@ export class KaraokeClient {
         console.log(parsedResponse)
         return parsedResponse;
     }
+
+    async getKaraokeData() {
+        const rawResponse = await fetch(this.host + "/songs/read");
+        const parsedResponse = await rawResponse.json();
+        return parsedResponse;
+    }
+    
 }
 
