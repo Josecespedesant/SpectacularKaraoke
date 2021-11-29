@@ -62,8 +62,10 @@ export default class Player extends Component {
       valueArtist: '',
       valueAlbum: '',
       valueLyrics: '',
-      selectedFile: null
-      
+      selectedFile: null,
+      wiki: '',
+      artista: ''
+
 
     }
     this.handleChangeName = this.handleChangeName.bind(this);
@@ -71,13 +73,13 @@ export default class Player extends Component {
     this.handleChangeAlbum = this.handleChangeAlbum.bind(this);
     this.handleChangeLyrics = this.handleChangeLyrics.bind(this);
     this.loadKaraoke = this.loadKaraoke.bind(this);
-    this.arraySong=[]
-    this.avg=0
+    this.arraySong = []
+    this.avg = 0
 
   }
 
   componentDidMount() {
-    
+
 
     let player = cdg.init("cdg", { autoplay: false, showControls: true });
     player.loadTrack({
@@ -93,10 +95,10 @@ export default class Player extends Component {
       player.stop();
     });
 
-    this.loadDataSongs();    
+    this.loadDataSongs();
   }
 
-  analyze(){
+  analyze() {
     this.loadKaraoke();
   }
 
@@ -123,7 +125,7 @@ export default class Player extends Component {
 
   async loadKaraoke() {
     const newData = await this.KaraokeClient.getKaraokeData();
-    this.arraySong=newData
+    this.arraySong = newData
     this.analyzeLetter();
   }
 
@@ -131,37 +133,40 @@ export default class Player extends Component {
     const newURL = await this.KaraokeClient.getSong(name);
     this.setState({
       urla: newURL.key,
-      lyrics: newURL.lyrics
+      lyrics: newURL.lyrics,
+      wiki: newURL.wiki,
+      artista: newURL.artist
     });
+    console.log(this.state.wiki)
   }
 
-  analyzeLetter(){
+  analyzeLetter() {
     var tokenizer = new natural.WordTokenizer();
-    var songLyrics=tokenizer.tokenize(this.state.lyrics)
-    var prom=[]
+    var songLyrics = tokenizer.tokenize(this.state.lyrics)
+    var prom = []
     var i = 0
     var a = 1
     for (; i < songLyrics.length; i++) {
-      if( a+1>=this.arraySong.length){ 
+      if (a + 1 >= this.arraySong.length) {
         //prom.push(1)
-      }else{ 
-          if(natural.DiceCoefficient(this.arraySong[a-1], songLyrics[i])>natural.DiceCoefficient(this.arraySong[a], songLyrics[i])){
-            prom.push(natural.DiceCoefficient(this.arraySong[a-1], songLyrics[i])) 
-            a-=1
-          }else{ 
-            if(natural.DiceCoefficient(this.arraySong[a+1], songLyrics[i])>natural.DiceCoefficient(this.arraySong[a], songLyrics[i])){
-              prom.push(natural.DiceCoefficient(this.arraySong[a+1], songLyrics[i])) 
-              a+=1
-            }else{ 
-              prom.push(natural.DiceCoefficient(this.arraySong[a], songLyrics[i]))
-            }
+      } else {
+        if (natural.DiceCoefficient(this.arraySong[a - 1], songLyrics[i]) > natural.DiceCoefficient(this.arraySong[a], songLyrics[i])) {
+          prom.push(natural.DiceCoefficient(this.arraySong[a - 1], songLyrics[i]))
+          a -= 1
+        } else {
+          if (natural.DiceCoefficient(this.arraySong[a + 1], songLyrics[i]) > natural.DiceCoefficient(this.arraySong[a], songLyrics[i])) {
+            prom.push(natural.DiceCoefficient(this.arraySong[a + 1], songLyrics[i]))
+            a += 1
+          } else {
+            prom.push(natural.DiceCoefficient(this.arraySong[a], songLyrics[i]))
           }
         }
-        a++
-   }
-    
+      }
+      a++
+    }
+
     let sum = prom.reduce((previous, current) => current += previous);
-    this.avg = sum / prom.length; 
+    this.avg = sum / prom.length;
     console.log(songLyrics)
     console.log(this.arraySong)
     console.log(prom)
@@ -249,14 +254,84 @@ export default class Player extends Component {
                   </div>
                   <div class="list-group list-group-flush">
                     <div class="row">
-                      <div class="col-xl-4 col-md-6"></div>
+                      <div class="col-xl-4 col-md-6">
+                        <div class="accordion mx-4 my-4" id="accordionFlushExample">
+                          <div class="accordion-item">
+                            <h4 class="form-label mx-3 my-2" id="flush-headingOne">
+                              Selected Song Artist: {this.state.artista}
+                            </h4>
+                          </div>
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingOne">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                Artist aliases
+                              </button>
+                            </h2>
+                            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                              <div class="accordion-body">
+                                <ul class="list-group">
+                                  {this.state.wiki.aliases ? Array.from(this.state.wiki.aliases).map((value, index) => <li class="list-group-item">{value}</li>) : <h4>Please select an Song</h4>}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingTwo">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                                Artist Begin
+                              </button>
+                            </h2>
+                            <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                              <div class="accordion-body">
+                                <ul class="list-group">
+                                  <li class="list-group-item">Area: {this.state.wiki.begin_area}</li>
+                                  <li class="list-group-item">Time: {this.state.wiki.begin_life}</li>
+                                  <li class="list-group-item">Country: {this.state.wiki.country}</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingThree">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                                Artist End
+                              </button>
+                            </h2>
+                            <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+                              <div class="accordion-body">
+                                <ul class="list-group">
+                                  <li class="list-group-item">Area: {this.state.wiki.end_area}</li>
+                                  <li class="list-group-item">Time: {this.state.wiki.end_life}</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingFour">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour">
+                                Artist Personal and Music Information
+                              </button>
+                            </h2>
+                            <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour" data-bs-parent="#accordionFlushExample">
+                              <div class="accordion-body">
+                              <ul class="list-group">
+                              <li class="list-group-item">Gender: {this.state.wiki.gender}</li>
+                              {this.state.wiki.aliases?Array.from(this.state.wiki.genres).map((value, index) =><li class="list-group-item">Genre: {value}</li>):<h4>Please select an Song</h4>}
+                              
+                                  </ul>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
                       <div class="col-xl-4 col-md-6">
                         <div className="lyrics">
                           <div id="cdg"></div>
                           <p>
                             <button id="stopbtn" class='btn btn-outline-primary'>Stop</button>
                             <button id="stopbtn" onClick={this.loadKaraoke} class='btn btn-outline-primary'>Analyze</button>
-                            
+
                           </p>
 
                         </div>
@@ -266,7 +341,7 @@ export default class Player extends Component {
                           <div class="card-body">Score!</div>
                           <div class="card-footer d-flex align-items-center justify-content-between">
                             <a class="small text-white stretched-link">Accuracy: </a>
-                            <div class="small text-white"> {this.avg*100} %</div>
+                            <div class="small text-white"> {this.avg * 100} %</div>
                           </div>
                         </div>
                       </div>

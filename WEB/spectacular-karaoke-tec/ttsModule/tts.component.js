@@ -26,7 +26,7 @@
  function main(
    encoding = 'LINEAR16',
    sampleRateHertz = 16000,
-   languageCode = 'en-US'
+   languageCode = 'es-US'
  ) {
    // [START micStreamRecognize]
    const recorder = require('node-record-lpcm16');

@@ -15,7 +15,6 @@ export class KaraokeClient {
     async getSong(name) {
         const rawResponse = await fetch(this.host + '/songs/new/' + name);
         const parsedResponse = await rawResponse.json();
-        console.log(parsedResponse)
         return parsedResponse;
     }
     async searchLyric(thing) {
